@@ -1,0 +1,37 @@
+# Stack completo en Docker (app + base de datos).
+# Uso:  docker compose -f docker-compose.prod.yml up -d --build
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: tickets-db-prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: tickets
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tickets_dev_pw}
+      POSTGRES_DB: tickets
+    volumes:
+      - tickets_pgdata_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tickets -d tickets"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    container_name: tickets-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "postgresql://tickets:${POSTGRES_PASSWORD:-tickets_dev_pw}@db:5432/tickets?schema=public"
+      AUTH_SECRET: ${AUTH_SECRET}
+      ADMIN_NAME: ${ADMIN_NAME}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+    ports:
+      - "3000:3000"
+
+volumes:
+  tickets_pgdata_prod:

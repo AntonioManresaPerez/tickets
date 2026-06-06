@@ -1,0 +1,133 @@
+// Esquema de la base de datos del gestor de tickets.
+// Docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+// Flujo de trabajo de un ticket.
+enum TaskStatus {
+  PENDING      // Pendiente
+  IN_PROGRESS  // En progreso
+  USER_REVIEW  // Revisión usuario
+  ADMIN_REVIEW // Revisión admin
+  DONE         // Producción / Finalizada
+}
+
+enum Priority {
+  LOW    // Baja
+  MEDIUM // Media
+  HIGH   // Alta
+  URGENT // Urgente
+}
+
+// Vencimiento simplificado por "cubos" en lugar de fecha exacta.
+enum DueBucket {
+  NONE  // Sin fecha
+  TODAY // Hoy
+  WEEK  // Esta semana
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String // hash bcrypt
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  createdTasks  Task[]         @relation("CreatedBy")
+  assignedTasks Task[]         @relation("AssignedTo")
+  comments      Comment[]
+  notifications Notification[]
+  activities    Activity[]
+}
+
+model Task {
+  id          Int        @id @default(autoincrement())
+  title       String
+  description String?
+  status      TaskStatus @default(PENDING)
+  priority    Priority   @default(MEDIUM)
+  hours       Float      @default(0)
+  labels      String[]   @default([])
+  dueBucket   DueBucket  @default(NONE)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  assigneeId String?
+  assignee   User?   @relation("AssignedTo", fields: [assigneeId], references: [id], onDelete: SetNull)
+
+  createdById String
+  createdBy   User   @relation("CreatedBy", fields: [createdById], references: [id])
+
+  comments   Comment[]
+  activities Activity[]
+
+  @@index([status])
+  @@index([priority])
+  @@index([assigneeId])
+  @@index([createdAt])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  body      String
+  createdAt DateTime @default(now())
+
+  taskId Int
+  task   Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
+
+  @@index([taskId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  message   String
+  link      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+}
+
+// Registro de auditoría ("Logs"): qué pasó, quién y cuándo.
+model Activity {
+  id        String   @id @default(cuid())
+  action    String // CREATED, STATUS_CHANGED, ASSIGNED, COMMENTED, UPDATED...
+  detail    String?
+  createdAt DateTime @default(now())
+
+  taskId Int?
+  task   Task? @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([taskId])
+  @@index([createdAt])
+}
+
+// Catálogo de etiquetas (lo que se va a tocar: backend, frontend, etc.).
+// El admin puede crear nuevas. En las tareas se guardan por nombre (Task.labels).
+model Label {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+}
