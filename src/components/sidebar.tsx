@@ -18,6 +18,7 @@ import {
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { NotificationBell } from "@/components/notification-bell";
 import type { SessionPayload } from "@/lib/auth";
 
 type NavItem = {
@@ -121,6 +122,7 @@ export function Sidebar({ session }: { session: SessionPayload }) {
 
         {/* Nav */}
         <nav className="flex-1 space-y-1 px-2 py-3">
+          <NotificationBell collapsed={collapsed} />
           {items.map((item) => {
             const active = item.exact
               ? pathname === item.href

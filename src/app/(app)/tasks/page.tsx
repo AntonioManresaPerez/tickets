@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { buildTaskWhere } from "@/lib/task-query";
 import { TaskFilters } from "@/components/task-filters";
 import { StatusBadge, PriorityBadge, LabelTag } from "@/components/badges";
-import { timeAgo } from "@/lib/utils";
+import { timeAgo, dueDateAlert } from "@/lib/utils";
 import type { StatusKey, PriorityKey } from "@/lib/constants";
 
 type SP = Record<string, string | string[] | undefined>;
@@ -73,37 +73,47 @@ export default async function TasksPage({
             No se encontraron tareas con esos filtros.
           </p>
         ) : (
-          tasks.map((t) => (
-            <Link
-              key={t.id}
-              href={`/tasks/${t.id}`}
-              className="block rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700/50"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <span className="font-medium text-slate-900 dark:text-slate-100">{t.title}</span>
-                <StatusBadge status={t.status as StatusKey} />
-              </div>
-              {t.description && (
-                <p className="mt-1 line-clamp-2 text-xs text-slate-400">{t.description}</p>
-              )}
-              {t.labels.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-1">
-                  {t.labels.map((l) => <LabelTag key={l}>{l}</LabelTag>)}
+          tasks.map((t) => {
+            const alert = t.status !== "DONE" ? dueDateAlert(t.dueDate, t.dueBucket) : null;
+            return (
+              <Link
+                key={t.id}
+                href={`/tasks/${t.id}`}
+                className="block rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700/50"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-medium text-slate-900 dark:text-slate-100">{t.title}</span>
+                    {alert && (
+                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${alert.cls}`}>
+                        {alert.label}
+                      </span>
+                    )}
+                  </div>
+                  <StatusBadge status={t.status as StatusKey} />
                 </div>
-              )}
-              <div className="mt-3 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <PriorityBadge priority={t.priority as PriorityKey} />
-                  <span className="text-xs text-slate-500 dark:text-slate-400">
-                    {t.assignee?.name ?? "Sin asignar"}
+                {t.description && (
+                  <p className="mt-1 line-clamp-2 text-xs text-slate-400">{t.description}</p>
+                )}
+                {t.labels.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {t.labels.map((l) => <LabelTag key={l}>{l}</LabelTag>)}
+                  </div>
+                )}
+                <div className="mt-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <PriorityBadge priority={t.priority as PriorityKey} />
+                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                      {t.assignee?.name ?? "Sin asignar"}
+                    </span>
+                  </div>
+                  <span className="text-xs text-slate-400">
+                    #{t.id} · {timeAgo(t.createdAt)}
                   </span>
                 </div>
-                <span className="text-xs text-slate-400">
-                  #{t.id} · {timeAgo(t.createdAt)}
-                </span>
-              </div>
-            </Link>
-          ))
+              </Link>
+            );
+          })
         )}
       </div>
 
@@ -123,7 +133,9 @@ export default async function TasksPage({
             No se encontraron tareas con esos filtros.
           </p>
         ) : (
-          tasks.map((t) => (
+          tasks.map((t) => {
+            const alert = t.status !== "DONE" ? dueDateAlert(t.dueDate, t.dueBucket) : null;
+            return (
             <Link
               key={t.id}
               href={`/tasks/${t.id}`}
@@ -131,8 +143,13 @@ export default async function TasksPage({
             >
               <span className="text-slate-400">{t.id}</span>
               <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="truncate font-medium text-slate-900">{t.title}</span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="truncate font-medium text-slate-900 dark:text-slate-100">{t.title}</span>
+                  {alert && (
+                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${alert.cls}`}>
+                      {alert.label}
+                    </span>
+                  )}
                   {t.labels.map((l) => (
                     <LabelTag key={l}>{l}</LabelTag>
                   ))}
@@ -154,7 +171,8 @@ export default async function TasksPage({
                 {timeAgo(t.createdAt)}
               </span>
             </Link>
-          ))
+            );
+          })
         )}
       </div>
     </div>

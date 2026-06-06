@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { notify } from "@/lib/activity";
+import { IDEA_STATUS, type IdeaStatusKey } from "@/lib/constants";
 
 export async function GET(
   _req: Request,
@@ -67,6 +69,16 @@ export async function PATCH(
       ...(d.data.status !== undefined && { status: d.data.status }),
     },
   });
+
+  if (d.data.status !== undefined && idea.authorId !== session.sub) {
+    const statusLabel = IDEA_STATUS[d.data.status as IdeaStatusKey]?.label ?? d.data.status;
+    await notify(
+      idea.authorId,
+      `Tu idea "${idea.title}" cambió a estado: ${statusLabel}`,
+      `/ideas/${id}`,
+    );
+  }
+
   return NextResponse.json(updated);
 }
 
