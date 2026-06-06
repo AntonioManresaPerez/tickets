@@ -37,11 +37,11 @@ function Meta({
 }) {
   return (
     <div className="flex items-center justify-between py-2 text-sm">
-      <span className="flex items-center gap-2 text-slate-500">
+      <span className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
         <Icon className="h-4 w-4" />
         {label}
       </span>
-      <span className="font-medium text-slate-900">{children}</span>
+      <span className="font-medium text-slate-900 dark:text-slate-100">{children}</span>
     </div>
   );
 }
@@ -78,7 +78,7 @@ export default async function TaskDetailPage({
     <div className="space-y-6">
       <Link
         href="/tasks"
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition hover:text-slate-700"
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
       >
         <ArrowLeft className="h-4 w-4" />
         Volver a tareas
@@ -99,7 +99,7 @@ export default async function TaskDetailPage({
         <div className="flex shrink-0 items-center gap-2">
           <Link
             href={`/tasks/${task.id}/edit`}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
           >
             <Pencil className="h-4 w-4" />
             Editar
@@ -111,19 +111,19 @@ export default async function TaskDetailPage({
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Columna principal */}
         <div className="space-y-6 lg:col-span-2">
-          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
               Estado
             </h2>
             <StatusWorkflow taskId={task.id} current={task.status as StatusKey} />
           </section>
 
-          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
             <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-400">
               Descripción
             </h2>
             {task.description ? (
-              <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
+              <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-slate-300">
                 {task.description}
               </p>
             ) : (
@@ -131,7 +131,7 @@ export default async function TaskDetailPage({
             )}
           </section>
 
-          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
             <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-400">
               Comentarios ({task.comments.length})
             </h2>
@@ -141,17 +141,17 @@ export default async function TaskDetailPage({
               ) : (
                 task.comments.map((c) => (
                   <div key={c.id} className="flex gap-3">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-200 text-xs font-semibold text-slate-600">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-200 text-xs font-semibold text-slate-600 dark:bg-slate-600 dark:text-slate-300">
                       {c.author.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-slate-900">
+                        <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
                           {c.author.name}
                         </span>
                         <span className="text-xs text-slate-400">{timeAgo(c.createdAt)}</span>
                       </div>
-                      <p className="mt-0.5 whitespace-pre-wrap text-sm text-slate-700">
+                      <p className="mt-0.5 whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300">
                         {c.body}
                       </p>
                     </div>
@@ -165,8 +165,8 @@ export default async function TaskDetailPage({
 
         {/* Barra lateral */}
         <div className="space-y-6">
-          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
               Asignación
             </h2>
             <AssignToMe
@@ -177,11 +177,11 @@ export default async function TaskDetailPage({
             />
           </section>
 
-          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
             <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-slate-400">
               Detalles
             </h2>
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-slate-100 dark:divide-slate-700">
               <Meta icon={Flag} label="Prioridad">
                 <PriorityBadge priority={task.priority as PriorityKey} />
               </Meta>
@@ -200,15 +200,15 @@ export default async function TaskDetailPage({
             </div>
           </section>
 
-          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
               Actividad
             </h2>
             <ul className="space-y-3">
               {task.activities.map((a) => (
                 <li key={a.id} className="text-sm">
-                  <span className="font-medium text-slate-900">{a.user.name}</span>{" "}
-                  <span className="text-slate-500">
+                  <span className="font-medium text-slate-900 dark:text-slate-100">{a.user.name}</span>{" "}
+                  <span className="text-slate-500 dark:text-slate-400">
                     {ACTION_LABELS[a.action] ?? a.action}
                   </span>
                   {a.detail && <span className="text-slate-500"> ({a.detail})</span>}

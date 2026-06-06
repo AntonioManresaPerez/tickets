@@ -25,8 +25,8 @@ export type TaskFormValues = {
 };
 
 const inputClass =
-  "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100";
-const labelClass = "mb-1 block text-sm font-medium text-slate-700";
+  "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:placeholder-slate-400 dark:focus:ring-blue-900/30";
+const labelClass = "mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300";
 
 const empty: TaskFormValues = {
   title: "",
@@ -136,7 +136,7 @@ export function TaskForm({
   return (
     <form
       onSubmit={onSubmit}
-      className="space-y-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+      className="space-y-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800"
     >
       <div>
         <label className={labelClass}>Título</label>
@@ -204,7 +204,6 @@ export function TaskForm({
         </div>
       </div>
 
-      {/* Vencimiento por casillas */}
       <div>
         <label className={labelClass}>Vencimiento</label>
         <div className="flex flex-wrap gap-2">
@@ -216,8 +215,8 @@ export function TaskForm({
               className={cn(
                 "rounded-lg border px-3 py-2 text-sm font-medium transition",
                 v.dueBucket === b
-                  ? "border-blue-600 bg-blue-50 text-blue-700"
-                  : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50",
+                  ? "border-blue-600 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                  : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600",
               )}
             >
               {DUE_BUCKET[b].label}
@@ -226,12 +225,11 @@ export function TaskForm({
         </div>
       </div>
 
-      {/* Etiquetas */}
       <div>
         <label className={labelClass}>Etiquetas (qué se va a tocar)</label>
         <div className="flex flex-wrap items-center gap-2">
           {labels.length === 0 && (
-            <span className="text-sm text-slate-400">No hay etiquetas todavía.</span>
+            <span className="text-sm text-slate-400 dark:text-slate-500">No hay etiquetas todavía.</span>
           )}
           {labels.map((name) => {
             const selected = v.labels.includes(name);
@@ -243,8 +241,8 @@ export function TaskForm({
                 className={cn(
                   "inline-flex items-center gap-1 rounded-full border px-3 py-1 text-sm font-medium transition",
                   selected
-                    ? "border-indigo-300 bg-indigo-50 text-indigo-700"
-                    : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50",
+                    ? "border-indigo-300 bg-indigo-50 text-indigo-700 dark:border-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400"
+                    : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600",
                 )}
               >
                 {selected && <Check className="h-3.5 w-3.5" />}
@@ -261,7 +259,7 @@ export function TaskForm({
               }}
               title="Nueva etiqueta"
               aria-label="Nueva etiqueta"
-              className="inline-flex items-center justify-center rounded-full border border-dashed border-slate-300 p-1.5 text-slate-400 transition hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600"
+              className="inline-flex items-center justify-center rounded-full border border-dashed border-slate-300 p-1.5 text-slate-400 transition hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 dark:border-slate-600 dark:text-slate-500 dark:hover:border-blue-500 dark:hover:bg-blue-900/20"
             >
               <Plus className="h-4 w-4" />
             </button>
@@ -270,7 +268,7 @@ export function TaskForm({
       </div>
 
       {error && (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 ring-1 ring-inset ring-red-200">
+        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 ring-1 ring-inset ring-red-200 dark:bg-red-900/20 dark:text-red-400 dark:ring-red-800">
           {error}
         </p>
       )}
@@ -286,14 +284,14 @@ export function TaskForm({
         <button
           type="button"
           onClick={() => router.back()}
-          className="rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100"
+          className="rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700"
         >
           Cancelar
         </button>
       </div>
 
       {mode === "create" && (
-        <p className="text-xs text-slate-400">
+        <p className="text-xs text-slate-400 dark:text-slate-500">
           La tarea se creará en estado <span className="font-medium">Pendiente</span>.
           El estado se cambia luego desde el detalle.
         </p>
@@ -305,11 +303,11 @@ export function TaskForm({
           onClick={() => setShowLabelModal(false)}
         >
           <div
-            className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl"
+            className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl dark:bg-slate-800"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-base font-semibold text-slate-900">Nueva etiqueta</h3>
-            <p className="mt-0.5 text-sm text-slate-500">¿Qué parte se va a tocar?</p>
+            <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">Nueva etiqueta</h3>
+            <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">¿Qué parte se va a tocar?</p>
             <input
               autoFocus
               value={newLabel}
@@ -321,13 +319,13 @@ export function TaskForm({
                 }
               }}
               placeholder="Ej: testing, infra…"
-              className="mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className="mt-3 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:placeholder-slate-400"
             />
             <div className="mt-4 flex justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setShowLabelModal(false)}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100"
+                className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700"
               >
                 Cancelar
               </button>

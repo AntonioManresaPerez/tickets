@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/theme-toggle";
 import type { SessionPayload } from "@/lib/auth";
 
 type NavItem = {
@@ -152,17 +153,20 @@ export function Sidebar({ session }: { session: SessionPayload }) {
               {session.role === "ADMIN" ? "Administrador" : "Usuario"}
             </p>
           </div>
-          <button
-            onClick={logout}
-            title={collapsed ? "Cerrar sesión" : undefined}
-            className={cn(
-              "flex w-full items-center rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white",
-              collapsed ? "lg:justify-center lg:px-0" : "gap-3",
-            )}
-          >
-            <LogOut className="h-4 w-4 shrink-0" />
-            <span className={cn(collapsed && "lg:hidden")}>Cerrar sesión</span>
-          </button>
+          <div className={cn("flex items-center", collapsed ? "lg:flex-col lg:gap-1" : "gap-1")}>
+            <button
+              onClick={logout}
+              title={collapsed ? "Cerrar sesión" : undefined}
+              className={cn(
+                "flex flex-1 items-center rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white",
+                collapsed ? "lg:w-full lg:flex-none lg:justify-center lg:px-0" : "gap-3",
+              )}
+            >
+              <LogOut className="h-4 w-4 shrink-0" />
+              <span className={cn(collapsed && "lg:hidden")}>Cerrar sesión</span>
+            </button>
+            <ThemeToggle />
+          </div>
         </div>
       </aside>
     </>

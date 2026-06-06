@@ -32,7 +32,7 @@ export function CommentForm({ taskId }: { taskId: number }) {
         onChange={(e) => setBody(e.target.value)}
         rows={2}
         placeholder="Escribe un comentario…"
-        className="flex-1 resize-none rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+        className="flex-1 resize-none rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:placeholder-slate-400 dark:focus:ring-blue-900/30"
       />
       <button
         type="submit"

@@ -25,7 +25,7 @@ export function DeleteTaskButton({ taskId }: { taskId: number }) {
     <button
       onClick={del}
       disabled={busy}
-      className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-60"
+      className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-60 dark:border-red-800 dark:bg-slate-800 dark:text-red-400 dark:hover:bg-red-900/20"
     >
       <Trash2 className="h-4 w-4" />
       Eliminar

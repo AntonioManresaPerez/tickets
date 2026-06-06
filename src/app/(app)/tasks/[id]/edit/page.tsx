@@ -34,7 +34,7 @@ export default async function EditTaskPage({
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+      <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
         Editar tarea #{task.id}
       </h1>
       <TaskForm

@@ -37,7 +37,6 @@ export function StatusWorkflow({
 
   return (
     <div className="space-y-4">
-      {/* Progreso por colores */}
       <div className="flex flex-wrap items-center gap-1.5">
         {STATUS_ORDER.map((s, i) => {
           const reached = i <= idx;
@@ -46,13 +45,13 @@ export function StatusWorkflow({
               key={s}
               className={cn(
                 "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset transition",
-                reached ? STATUS[s].badge : "bg-slate-50 text-slate-400 ring-slate-200",
+                reached ? STATUS[s].badge : "bg-slate-50 text-slate-400 ring-slate-200 dark:bg-slate-700 dark:text-slate-500 dark:ring-slate-600",
               )}
             >
               <span
                 className={cn(
                   "h-1.5 w-1.5 rounded-full",
-                  reached ? STATUS[s].dot : "bg-slate-300",
+                  reached ? STATUS[s].dot : "bg-slate-300 dark:bg-slate-600",
                 )}
               />
               {STATUS[s].label}
@@ -61,7 +60,6 @@ export function StatusWorkflow({
         })}
       </div>
 
-      {/* Botones de avance / retroceso */}
       <div className="flex flex-wrap items-center gap-2">
         {next ? (
           <button
@@ -76,7 +74,7 @@ export function StatusWorkflow({
             <ArrowRight className="h-4 w-4" />
           </button>
         ) : (
-          <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">
+          <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:ring-emerald-800">
             <Check className="h-4 w-4" />
             Finalizada
           </span>
@@ -85,7 +83,7 @@ export function StatusWorkflow({
           <button
             onClick={() => move(prev)}
             disabled={saving}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-60 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
           >
             <ArrowLeft className="h-4 w-4" />
             Volver a {STATUS[prev].label}

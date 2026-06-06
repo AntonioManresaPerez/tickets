@@ -23,8 +23,8 @@ export default async function UsersPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Usuarios</h1>
-        <p className="mt-1 text-slate-500">Gestiona las cuentas del equipo</p>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Usuarios</h1>
+        <p className="mt-1 text-slate-500 dark:text-slate-400">Gestiona las cuentas del equipo</p>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">

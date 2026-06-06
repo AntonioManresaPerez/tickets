@@ -17,12 +17,12 @@ function StatCard({
   color: string;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
       <div className={cn("mb-3 flex h-10 w-10 items-center justify-center rounded-lg", color)}>
         <Icon className="h-5 w-5" />
       </div>
-      <p className="text-3xl font-bold text-slate-900">{value}</p>
-      <p className="text-sm text-slate-500">{label}</p>
+      <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">{value}</p>
+      <p className="text-sm text-slate-500 dark:text-slate-400">{label}</p>
     </div>
   );
 }
@@ -54,10 +54,10 @@ export default async function DashboardPage() {
     <div className="space-y-8">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
             Hola, {firstName} 👋
           </h1>
-          <p className="mt-1 text-slate-500">Aquí tienes un resumen de las tareas</p>
+          <p className="mt-1 text-slate-500 dark:text-slate-400">Aquí tienes un resumen de las tareas</p>
         </div>
         <Link
           href="/tasks/new"
@@ -78,14 +78,14 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         <section>
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-slate-900">Mis tareas activas</h2>
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Mis tareas activas</h2>
             <Link href="/tasks" className="text-sm font-medium text-blue-600 hover:text-blue-700">
               Ver todas
             </Link>
           </div>
           <div className="space-y-3">
             {myActive.length === 0 ? (
-              <p className="rounded-xl border border-dashed border-slate-200 bg-white p-6 text-center text-sm text-slate-400">
+              <p className="rounded-xl border border-dashed border-slate-200 bg-white p-6 text-center text-sm text-slate-400 dark:border-slate-700 dark:bg-slate-800">
                 No tienes tareas activas asignadas.
               </p>
             ) : (
@@ -96,7 +96,7 @@ export default async function DashboardPage() {
 
         <section>
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-slate-900">Tareas recientes</h2>
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Tareas recientes</h2>
             <Link href="/tasks" className="text-sm font-medium text-blue-600 hover:text-blue-700">
               Ver todas
             </Link>
