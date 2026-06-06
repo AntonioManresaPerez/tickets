@@ -12,7 +12,7 @@ export default async function AppLayout({
     <div className="flex min-h-screen bg-slate-50">
       <Sidebar session={session} />
       <main className="flex-1 overflow-x-hidden">
-        <div className="mx-auto max-w-7xl px-8 py-8">{children}</div>
+        <div className="mx-auto max-w-7xl px-4 pb-8 pt-16 sm:px-6 sm:pt-8 lg:px-8">{children}</div>
       </main>
     </div>
   );

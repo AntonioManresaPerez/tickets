@@ -61,105 +61,138 @@ export function UsersManager({ users }: { users: U[] }) {
     }
   }
 
+  const editForm = (u: U) =>
+    editing === u.id ? (
+      <div className="space-y-3 bg-slate-50 px-5 py-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div>
+            <label className="mb-1 block text-xs font-medium text-slate-600">Nombre</label>
+            <input
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium text-slate-600">Email</label>
+            <input
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium text-slate-600">Rol</label>
+            <select
+              value={form.role}
+              onChange={(e) => setForm({ ...form, role: e.target.value })}
+              className={inputClass}
+            >
+              <option value="USER">Usuario</option>
+              <option value="ADMIN">Administrador</option>
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium text-slate-600">
+              Nueva contraseña (opcional)
+            </label>
+            <input
+              type="password"
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              placeholder="Dejar en blanco para no cambiar"
+              className={inputClass}
+            />
+          </div>
+        </div>
+
+        {error && (
+          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 ring-1 ring-inset ring-red-200">
+            {error}
+          </p>
+        )}
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => save(u.id)}
+            disabled={saving}
+            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
+          >
+            {saving ? "Guardando…" : "Guardar"}
+          </button>
+          <button
+            onClick={() => setEditing(null)}
+            className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100"
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    ) : null;
+
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <div className="grid grid-cols-[1fr_1.4fr_8rem_7rem_5rem] gap-3 border-b border-slate-100 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
-        <span>Nombre</span>
-        <span>Email</span>
-        <span>Rol</span>
-        <span className="text-right">Alta</span>
-        <span></span>
-      </div>
-
-      {users.map((u) => (
-        <div key={u.id} className="border-b border-slate-50 last:border-0">
-          <div className="grid grid-cols-[1fr_1.4fr_8rem_7rem_5rem] items-center gap-3 px-5 py-3.5 text-sm">
-            <span className="font-medium text-slate-900">{u.name}</span>
-            <span className="truncate text-slate-600">{u.email}</span>
-            <span>
-              <RoleBadge role={u.role} />
-            </span>
-            <span className="text-right text-xs text-slate-400">{u.created}</span>
-            <span className="text-right">
-              <button
-                onClick={() => (editing === u.id ? setEditing(null) : startEdit(u))}
-                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
-              >
-                <Pencil className="h-3.5 w-3.5" />
-                Editar
-              </button>
-            </span>
-          </div>
-
-          {editing === u.id && (
-            <div className="space-y-3 bg-slate-50 px-5 py-4">
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-slate-600">Nombre</label>
-                  <input
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className={inputClass}
-                  />
+      {/* Mobile: cards */}
+      <div className="divide-y divide-slate-100 lg:hidden">
+        {users.map((u) => (
+          <div key={u.id}>
+            <div className="px-5 py-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-medium text-slate-900">{u.name}</p>
+                  <p className="truncate text-sm text-slate-500">{u.email}</p>
+                  <p className="mt-1 text-xs text-slate-400">Alta: {u.created}</p>
                 </div>
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-slate-600">Email</label>
-                  <input
-                    value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    className={inputClass}
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-slate-600">Rol</label>
-                  <select
-                    value={form.role}
-                    onChange={(e) => setForm({ ...form, role: e.target.value })}
-                    className={inputClass}
+                <div className="flex shrink-0 items-center gap-2">
+                  <RoleBadge role={u.role} />
+                  <button
+                    onClick={() => (editing === u.id ? setEditing(null) : startEdit(u))}
+                    className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
                   >
-                    <option value="USER">Usuario</option>
-                    <option value="ADMIN">Administrador</option>
-                  </select>
+                    <Pencil className="h-3.5 w-3.5" />
+                    Editar
+                  </button>
                 </div>
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-slate-600">
-                    Nueva contraseña (opcional)
-                  </label>
-                  <input
-                    type="password"
-                    value={form.password}
-                    onChange={(e) => setForm({ ...form, password: e.target.value })}
-                    placeholder="Dejar en blanco para no cambiar"
-                    className={inputClass}
-                  />
-                </div>
-              </div>
-
-              {error && (
-                <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 ring-1 ring-inset ring-red-200">
-                  {error}
-                </p>
-              )}
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => save(u.id)}
-                  disabled={saving}
-                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
-                >
-                  {saving ? "Guardando…" : "Guardar"}
-                </button>
-                <button
-                  onClick={() => setEditing(null)}
-                  className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100"
-                >
-                  Cancelar
-                </button>
               </div>
             </div>
-          )}
+            {editForm(u)}
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop: table */}
+      <div className="hidden lg:block">
+        <div className="grid grid-cols-[1fr_1.4fr_8rem_7rem_5rem] gap-3 border-b border-slate-100 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
+          <span>Nombre</span>
+          <span>Email</span>
+          <span>Rol</span>
+          <span className="text-right">Alta</span>
+          <span></span>
         </div>
-      ))}
+
+        {users.map((u) => (
+          <div key={u.id} className="border-b border-slate-50 last:border-0">
+            <div className="grid grid-cols-[1fr_1.4fr_8rem_7rem_5rem] items-center gap-3 px-5 py-3.5 text-sm">
+              <span className="font-medium text-slate-900">{u.name}</span>
+              <span className="truncate text-slate-600">{u.email}</span>
+              <span>
+                <RoleBadge role={u.role} />
+              </span>
+              <span className="text-right text-xs text-slate-400">{u.created}</span>
+              <span className="text-right">
+                <button
+                  onClick={() => (editing === u.id ? setEditing(null) : startEdit(u))}
+                  className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                  Editar
+                </button>
+              </span>
+            </div>
+            {editForm(u)}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

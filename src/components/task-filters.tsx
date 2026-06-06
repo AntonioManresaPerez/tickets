@@ -65,8 +65,8 @@ export function TaskFilters({
 
   return (
     <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative min-w-56 flex-1">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+        <div className="relative w-full sm:min-w-56 sm:flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
             value={f.q}
@@ -76,44 +76,46 @@ export function TaskFilters({
           />
         </div>
 
-        <select
-          value={f.status}
-          onChange={(e) => update({ status: e.target.value })}
-          className={selectClass}
-        >
-          <option value="">Todos los estados</option>
-          {STATUS_ORDER.map((s) => (
-            <option key={s} value={s}>
-              {STATUS[s].label}
-            </option>
-          ))}
-        </select>
+        <div className="grid grid-cols-2 gap-3 sm:contents">
+          <select
+            value={f.status}
+            onChange={(e) => update({ status: e.target.value })}
+            className={selectClass}
+          >
+            <option value="">Todos los estados</option>
+            {STATUS_ORDER.map((s) => (
+              <option key={s} value={s}>
+                {STATUS[s].label}
+              </option>
+            ))}
+          </select>
 
-        <select
-          value={f.priority}
-          onChange={(e) => update({ priority: e.target.value })}
-          className={selectClass}
-        >
-          <option value="">Todas las prioridades</option>
-          {PRIORITY_ORDER.map((p) => (
-            <option key={p} value={p}>
-              {PRIORITY[p].label}
-            </option>
-          ))}
-        </select>
+          <select
+            value={f.priority}
+            onChange={(e) => update({ priority: e.target.value })}
+            className={selectClass}
+          >
+            <option value="">Todas las prioridades</option>
+            {PRIORITY_ORDER.map((p) => (
+              <option key={p} value={p}>
+                {PRIORITY[p].label}
+              </option>
+            ))}
+          </select>
 
-        <select
-          value={f.assigneeId}
-          onChange={(e) => update({ assigneeId: e.target.value })}
-          className={selectClass}
-        >
-          <option value="">Todos los usuarios</option>
-          {users.map((u) => (
-            <option key={u.id} value={u.id}>
-              {u.name}
-            </option>
-          ))}
-        </select>
+          <select
+            value={f.assigneeId}
+            onChange={(e) => update({ assigneeId: e.target.value })}
+            className={selectClass + " col-span-2 sm:col-span-1"}
+          >
+            <option value="">Todos los usuarios</option>
+            {users.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -127,7 +129,7 @@ export function TaskFilters({
           Mostrar finalizadas
         </label>
 
-        <div className="flex items-center gap-2 text-sm text-slate-500">
+        <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500">
           <span>Desde</span>
           <input
             type="date"
