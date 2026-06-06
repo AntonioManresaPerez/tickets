@@ -69,3 +69,33 @@ export async function PATCH(
 
   return NextResponse.json({ ok: true });
 }
+
+export async function DELETE(
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const session = await getSession();
+  if (!session) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  if (session.role !== "ADMIN") {
+    return NextResponse.json({ error: "Solo el administrador puede borrar usuarios" }, { status: 403 });
+  }
+
+  const { id } = await params;
+
+  if (id === session.sub) {
+    return NextResponse.json({ error: "No puedes eliminar tu propia cuenta" }, { status: 400 });
+  }
+
+  const target = await prisma.user.findUnique({ where: { id } });
+  if (!target) return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
+
+  if (target.role === "ADMIN") {
+    const admins = await prisma.user.count({ where: { role: "ADMIN" } });
+    if (admins <= 1) {
+      return NextResponse.json({ error: "Debe quedar al menos un administrador" }, { status: 400 });
+    }
+  }
+
+  await prisma.user.delete({ where: { id } });
+  return NextResponse.json({ ok: true });
+}

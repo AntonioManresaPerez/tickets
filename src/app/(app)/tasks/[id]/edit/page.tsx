@@ -29,6 +29,7 @@ export default async function EditTaskPage({
     assigneeId: task.assigneeId ?? "",
     hours: task.hours,
     dueBucket: task.dueBucket,
+    dueDate: task.dueDate ? task.dueDate.toISOString().split("T")[0] : "",
     labels: task.labels,
   };
 

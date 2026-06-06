@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Pencil } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 
 type U = { id: string; name: string; email: string; role: string; created: string };
 
@@ -34,6 +34,17 @@ export function UsersManager({ users }: { users: U[] }) {
     setEditing(u.id);
     setForm({ name: u.name, email: u.email, role: u.role, password: "" });
     setError(null);
+  }
+
+  async function remove(id: string, name: string) {
+    if (!confirm(`¿Eliminar al usuario "${name}"? Esta acción no se puede deshacer.`)) return;
+    const res = await fetch(`/api/users/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      router.refresh();
+    } else {
+      const d = await res.json().catch(() => ({}));
+      alert(d.error ?? "No se pudo eliminar");
+    }
   }
 
   async function save(id: string) {
@@ -152,6 +163,12 @@ export function UsersManager({ users }: { users: U[] }) {
                     <Pencil className="h-3.5 w-3.5" />
                     Editar
                   </button>
+                  <button
+                    onClick={() => remove(u.id, u.name)}
+                    className="inline-flex items-center gap-1 rounded-lg border border-red-200 px-2 py-1 text-xs font-medium text-red-600 transition hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
                 </div>
               </div>
             </div>
@@ -162,7 +179,7 @@ export function UsersManager({ users }: { users: U[] }) {
 
       {/* Desktop: table */}
       <div className="hidden lg:block">
-        <div className="grid grid-cols-[1fr_1.4fr_8rem_7rem_5rem] gap-3 border-b border-slate-100 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:border-slate-700">
+        <div className="grid grid-cols-[1fr_1.4fr_8rem_7rem_7rem] gap-3 border-b border-slate-100 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:border-slate-700">
           <span>Nombre</span>
           <span>Email</span>
           <span>Rol</span>
@@ -172,20 +189,26 @@ export function UsersManager({ users }: { users: U[] }) {
 
         {users.map((u) => (
           <div key={u.id} className="border-b border-slate-50 last:border-0 dark:border-slate-700/50">
-            <div className="grid grid-cols-[1fr_1.4fr_8rem_7rem_5rem] items-center gap-3 px-5 py-3.5 text-sm">
+            <div className="grid grid-cols-[1fr_1.4fr_8rem_7rem_7rem] items-center gap-3 px-5 py-3.5 text-sm">
               <span className="font-medium text-slate-900">{u.name}</span>
               <span className="truncate text-slate-600">{u.email}</span>
               <span>
                 <RoleBadge role={u.role} />
               </span>
               <span className="text-right text-xs text-slate-400 dark:text-slate-500">{u.created}</span>
-              <span className="text-right">
+              <span className="flex items-center justify-end gap-1.5">
                 <button
                   onClick={() => (editing === u.id ? setEditing(null) : startEdit(u))}
                   className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-50 dark:border-slate-600 dark:text-slate-400 dark:hover:bg-slate-700"
                 >
                   <Pencil className="h-3.5 w-3.5" />
                   Editar
+                </button>
+                <button
+                  onClick={() => remove(u.id, u.name)}
+                  className="inline-flex items-center rounded-lg border border-red-200 px-2 py-1 text-xs font-medium text-red-600 transition hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
                 </button>
               </span>
             </div>

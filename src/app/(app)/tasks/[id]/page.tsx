@@ -10,6 +10,9 @@ import { StatusWorkflow } from "@/components/status-workflow";
 import { CommentForm } from "@/components/comment-form";
 import { DeleteTaskButton } from "@/components/delete-task-button";
 import { AssignToMe } from "@/components/assign-to-me";
+import { Checklist } from "@/components/checklist";
+import { InlineDescription } from "@/components/inline-description";
+import { DeleteCommentButton } from "@/components/delete-comment-button";
 import { timeAgo } from "@/lib/utils";
 import {
   DUE_BUCKET,
@@ -62,13 +65,16 @@ export default async function TaskDetailPage({
       assignee: { select: { name: true } },
       createdBy: { select: { name: true } },
       comments: {
-        include: { author: { select: { name: true } } },
+        include: { author: { select: { id: true, name: true } } },
         orderBy: { createdAt: "asc" },
       },
       activities: {
         include: { user: { select: { name: true } } },
         orderBy: { createdAt: "desc" },
         take: 30,
+      },
+      checklistItems: {
+        orderBy: { order: "asc" },
       },
     },
   });
@@ -92,7 +98,7 @@ export default async function TaskDetailPage({
               <LabelTag key={l}>{l}</LabelTag>
             ))}
           </div>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
             {task.title}
           </h1>
         </div>
@@ -119,28 +125,31 @@ export default async function TaskDetailPage({
           </section>
 
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-400">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
               Descripción
             </h2>
-            {task.description ? (
-              <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-slate-300">
-                {task.description}
-              </p>
-            ) : (
-              <p className="text-sm text-slate-400">Sin descripción.</p>
-            )}
+            <InlineDescription taskId={task.id} description={task.description ?? null} />
           </section>
 
+          <Checklist
+            taskId={task.id}
+            items={task.checklistItems.map((i) => ({
+              id: i.id,
+              text: i.text,
+              done: i.done,
+            }))}
+          />
+
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-400">
+            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
               Comentarios ({task.comments.length})
             </h2>
             <div className="mb-4 space-y-4">
               {task.comments.length === 0 ? (
-                <p className="text-sm text-slate-400">Aún no hay comentarios.</p>
+                <p className="text-sm text-slate-400 dark:text-slate-500">Aún no hay comentarios.</p>
               ) : (
                 task.comments.map((c) => (
-                  <div key={c.id} className="flex gap-3">
+                  <div key={c.id} className="group flex gap-3">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-200 text-xs font-semibold text-slate-600 dark:bg-slate-600 dark:text-slate-300">
                       {c.author.name.charAt(0).toUpperCase()}
                     </div>
@@ -150,6 +159,9 @@ export default async function TaskDetailPage({
                           {c.author.name}
                         </span>
                         <span className="text-xs text-slate-400">{timeAgo(c.createdAt)}</span>
+                        {(session.role === "ADMIN" || c.author.id === session.sub) && (
+                          <DeleteCommentButton commentId={c.id} />
+                        )}
                       </div>
                       <p className="mt-0.5 whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300">
                         {c.body}
@@ -178,7 +190,7 @@ export default async function TaskDetailPage({
           </section>
 
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-            <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-slate-400">
+            <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
               Detalles
             </h2>
             <div className="divide-y divide-slate-100 dark:divide-slate-700">
@@ -189,7 +201,9 @@ export default async function TaskDetailPage({
                 {task.createdBy.name}
               </Meta>
               <Meta icon={CalendarClock} label="Vencimiento">
-                {DUE_BUCKET[task.dueBucket as DueBucketKey].label}
+                {task.dueDate
+                  ? format(task.dueDate, "d MMM yyyy", { locale: es })
+                  : DUE_BUCKET[task.dueBucket as DueBucketKey].label}
               </Meta>
               <Meta icon={Clock} label="Horas est.">
                 {task.hours}h
@@ -211,7 +225,7 @@ export default async function TaskDetailPage({
                   <span className="text-slate-500 dark:text-slate-400">
                     {ACTION_LABELS[a.action] ?? a.action}
                   </span>
-                  {a.detail && <span className="text-slate-500"> ({a.detail})</span>}
+                  {a.detail && <span className="text-slate-500 dark:text-slate-400"> ({a.detail})</span>}
                   <div className="text-xs text-slate-400">{timeAgo(a.createdAt)}</div>
                 </li>
               ))}

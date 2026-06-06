@@ -21,6 +21,7 @@ export type TaskFormValues = {
   assigneeId: string;
   hours: number;
   dueBucket: string;
+  dueDate: string;
   labels: string[];
 };
 
@@ -35,6 +36,7 @@ const empty: TaskFormValues = {
   assigneeId: "",
   hours: 0,
   dueBucket: "NONE",
+  dueDate: "",
   labels: [],
 };
 
@@ -109,6 +111,7 @@ export function TaskForm({
       assigneeId: v.assigneeId || null,
       hours: Number(v.hours) || 0,
       dueBucket: v.dueBucket,
+      dueDate: v.dueDate || null,
       labels: v.labels,
     };
 
@@ -202,10 +205,22 @@ export function TaskForm({
             className={inputClass}
           />
         </div>
+        <div>
+          <label className={labelClass}>Fecha límite (opcional)</label>
+          <input
+            type="date"
+            value={v.dueDate}
+            onChange={(e) => set("dueDate", e.target.value)}
+            className={inputClass}
+          />
+          <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+            Aparecerá en el calendario en esa fecha.
+          </p>
+        </div>
       </div>
 
       <div>
-        <label className={labelClass}>Vencimiento</label>
+        <label className={labelClass}>Vencimiento rápido</label>
         <div className="flex flex-wrap gap-2">
           {DUE_BUCKET_ORDER.map((b) => (
             <button

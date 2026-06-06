@@ -11,6 +11,7 @@ const createSchema = z.object({
   assigneeId: z.string().optional().nullable(),
   hours: z.number().min(0).optional(),
   dueBucket: z.enum(["NONE", "TODAY", "WEEK"]).optional(),
+  dueDate: z.string().optional().nullable(),
   labels: z.array(z.string()).optional(),
 });
 
@@ -36,6 +37,7 @@ export async function POST(req: Request) {
       priority: d.priority ?? "MEDIUM",
       hours: d.hours ?? 0,
       dueBucket: d.dueBucket ?? "NONE",
+      dueDate: d.dueDate ? new Date(d.dueDate) : null,
       labels: d.labels ?? [],
       assigneeId: d.assigneeId || null,
       createdById: session.sub,
