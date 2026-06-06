@@ -51,6 +51,9 @@ model User {
   comments      Comment[]
   notifications Notification[]
   activities    Activity[]
+  ideas         Idea[]
+  ideaVotes     IdeaVote[]
+  ideaComments  IdeaComment[]
 }
 
 model Task {
@@ -146,4 +149,57 @@ model Label {
   id        String   @id @default(cuid())
   name      String   @unique
   createdAt DateTime @default(now())
+}
+
+enum IdeaStatus {
+  OPEN
+  PLANNED
+  DOING
+  DONE
+  REJECTED
+}
+
+model Idea {
+  id        String     @id @default(cuid())
+  title     String
+  body      String?
+  status    IdeaStatus @default(OPEN)
+  category  String?
+  links     String[]   @default([])
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
+
+  votes    IdeaVote[]
+  comments IdeaComment[]
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model IdeaVote {
+  userId    String
+  ideaId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  idea Idea @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+
+  @@id([userId, ideaId])
+}
+
+model IdeaComment {
+  id        String   @id @default(cuid())
+  body      String
+  createdAt DateTime @default(now())
+
+  ideaId String
+  idea   Idea   @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
+
+  @@index([ideaId])
 }

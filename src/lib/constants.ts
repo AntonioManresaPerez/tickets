@@ -89,3 +89,38 @@ export const DUE_BUCKET = {
 export type DueBucketKey = keyof typeof DUE_BUCKET;
 
 export const DUE_BUCKET_ORDER: DueBucketKey[] = ["NONE", "TODAY", "WEEK"];
+
+export const IDEA_STATUS = {
+  OPEN: {
+    label: "Abierta",
+    badge: "bg-amber-50 text-amber-700 ring-amber-200",
+  },
+  PLANNED: {
+    label: "Planificada",
+    badge: "bg-blue-50 text-blue-700 ring-blue-200",
+  },
+  DOING: {
+    label: "En desarrollo",
+    badge: "bg-indigo-50 text-indigo-700 ring-indigo-200",
+  },
+  DONE: {
+    label: "Implementada",
+    badge: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+  },
+  REJECTED: {
+    label: "Descartada",
+    badge: "bg-slate-100 text-slate-500 ring-slate-200",
+  },
+} as const;
+
+export type IdeaStatusKey = keyof typeof IDEA_STATUS;
+
+export const IDEA_STATUS_ORDER: IdeaStatusKey[] = ["OPEN", "PLANNED", "DOING", "DONE", "REJECTED"];
+
+export const IDEA_CATEGORIES: Record<string, string> = {
+  feature: "Nueva funcionalidad",
+  improvement: "Mejora",
+  design: "Diseño",
+  performance: "Rendimiento",
+  other: "Otro",
+};

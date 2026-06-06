@@ -13,6 +13,7 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  Lightbulb,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -31,6 +32,7 @@ const NAV: NavItem[] = [
   { href: "/", label: "Dashboard", icon: LayoutGrid, exact: true },
   { href: "/tasks", label: "Tareas", icon: ListChecks },
   { href: "/calendar", label: "Calendario", icon: CalendarDays },
+  { href: "/ideas", label: "Ideas", icon: Lightbulb },
   { href: "/tasks/new", label: "Nueva Tarea", icon: Plus, exact: true },
   { href: "/users", label: "Usuarios", icon: Users, adminOnly: true },
 ];
