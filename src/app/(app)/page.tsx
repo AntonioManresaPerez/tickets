@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ListTodo, Loader2, AlertCircle, CheckCircle2, Plus } from "lucide-react";
 import { requireUser } from "@/lib/auth";
+import { requireSection } from "@/lib/section";
 import { prisma } from "@/lib/prisma";
 import { TaskCard } from "@/components/task-card";
 import { cn } from "@/lib/utils";
@@ -29,19 +30,21 @@ function StatCard({
 
 export default async function DashboardPage() {
   const session = await requireUser();
+  const section = await requireSection();
 
   const [pending, inProgress, inReview, done, myActive, recent] = await Promise.all([
-    prisma.task.count({ where: { status: "PENDING" } }),
-    prisma.task.count({ where: { status: "IN_PROGRESS" } }),
-    prisma.task.count({ where: { status: { in: ["USER_REVIEW", "ADMIN_REVIEW"] } } }),
-    prisma.task.count({ where: { status: "DONE" } }),
+    prisma.task.count({ where: { section, status: "PENDING" } }),
+    prisma.task.count({ where: { section, status: "IN_PROGRESS" } }),
+    prisma.task.count({ where: { section, status: { in: ["USER_REVIEW", "ADMIN_REVIEW"] } } }),
+    prisma.task.count({ where: { section, status: "DONE" } }),
     prisma.task.findMany({
-      where: { assigneeId: session.sub, status: { not: "DONE" } },
+      where: { section, assigneeId: session.sub, status: { not: "DONE" } },
       include: { assignee: { select: { name: true } } },
       orderBy: { updatedAt: "desc" },
       take: 6,
     }),
     prisma.task.findMany({
+      where: { section },
       include: { assignee: { select: { name: true } } },
       orderBy: { createdAt: "desc" },
       take: 6,

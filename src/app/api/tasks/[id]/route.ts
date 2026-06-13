@@ -8,9 +8,10 @@ import { STATUS } from "@/lib/constants";
 const updateSchema = z.object({
   title: z.string().min(1).optional(),
   description: z.string().nullable().optional(),
-  status: z.enum(["PENDING", "IN_PROGRESS", "USER_REVIEW", "ADMIN_REVIEW", "DONE"]).optional(),
+  status: z.enum(["PENDING", "IN_PROGRESS", "PAUSED", "USER_REVIEW", "ADMIN_REVIEW", "DONE"]).optional(),
   priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]).optional(),
   assigneeId: z.string().nullable().optional(),
+  sprintId: z.string().nullable().optional(),
   hours: z.number().min(0).optional(),
   dueBucket: z.enum(["NONE", "TODAY", "WEEK"]).optional(),
   dueDate: z.string().nullable().optional(),
@@ -49,12 +50,15 @@ export async function PATCH(
       ...(d.title !== undefined && { title: d.title }),
       ...(d.description !== undefined && { description: d.description }),
       ...(d.status !== undefined && { status: d.status }),
+      // La primera vez que pasa a "En progreso" guardamos cuándo se inició.
+      ...(d.status === "IN_PROGRESS" && !existing.startedAt && { startedAt: new Date() }),
       ...(d.priority !== undefined && { priority: d.priority }),
       ...(d.hours !== undefined && { hours: d.hours }),
       ...(d.dueBucket !== undefined && { dueBucket: d.dueBucket }),
       ...(d.dueDate !== undefined && { dueDate: d.dueDate ? new Date(d.dueDate) : null }),
       ...(d.labels !== undefined && { labels: d.labels }),
       ...(d.assigneeId !== undefined && { assigneeId: d.assigneeId || null }),
+      ...(d.sprintId !== undefined && { sprintId: d.sprintId || null }),
     },
   });
 

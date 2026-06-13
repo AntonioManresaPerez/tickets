@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
+import { canAccessSection } from "@/lib/section";
 import { prisma } from "@/lib/prisma";
 import { IdeaForm } from "@/components/idea-form";
 
@@ -13,6 +14,7 @@ export default async function EditIdeaPage({
 
   const idea = await prisma.idea.findUnique({ where: { id } });
   if (!idea) notFound();
+  if (!(await canAccessSection(idea.section))) notFound();
 
   if (idea.authorId !== session.sub && session.role !== "ADMIN") {
     notFound();

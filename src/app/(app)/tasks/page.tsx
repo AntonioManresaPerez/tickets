@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { requireUser } from "@/lib/auth";
+import { requireSection, sectionUsers } from "@/lib/section";
 import { prisma } from "@/lib/prisma";
 import { buildTaskWhere } from "@/lib/task-query";
 import { TaskFilters } from "@/components/task-filters";
@@ -20,6 +21,7 @@ export default async function TasksPage({
   searchParams: Promise<SP>;
 }) {
   await requireUser();
+  const section = await requireSection();
   const sp = await searchParams;
 
   const filters = {
@@ -30,6 +32,7 @@ export default async function TasksPage({
     from: str(sp.from),
     to: str(sp.to),
     showDone: str(sp.showDone) === "1",
+    section,
   };
 
   const where = buildTaskWhere(filters);
@@ -40,10 +43,7 @@ export default async function TasksPage({
       include: { assignee: { select: { name: true } } },
       orderBy: { createdAt: "desc" },
     }),
-    prisma.user.findMany({
-      select: { id: true, name: true },
-      orderBy: { name: "asc" },
-    }),
+    sectionUsers(section),
   ]);
 
   return (

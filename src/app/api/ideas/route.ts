@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth";
+import { getActiveSection } from "@/lib/section";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   const session = await requireUser();
+  const section = await getActiveSection();
+  if (!section) return NextResponse.json([]);
   const ideas = await prisma.idea.findMany({
+    where: { section },
     orderBy: { createdAt: "desc" },
     include: {
       author: { select: { id: true, name: true } },
@@ -25,6 +29,9 @@ const schema = z.object({
 
 export async function POST(req: Request) {
   const session = await requireUser();
+  const section = await getActiveSection();
+  if (!section) return NextResponse.json({ error: "Sin sección activa" }, { status: 403 });
+
   const body = await req.json().catch(() => null);
   const d = schema.safeParse(body);
   if (!d.success) return NextResponse.json({ error: "Datos inválidos" }, { status: 400 });
@@ -34,6 +41,7 @@ export async function POST(req: Request) {
       title: d.data.title,
       body: d.data.body || null,
       category: d.data.category || null,
+      section,
       links: d.data.links.filter(Boolean),
       authorId: session.sub,
     },

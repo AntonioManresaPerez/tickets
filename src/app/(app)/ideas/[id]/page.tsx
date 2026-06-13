@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Link2, Pencil, MessageSquare } from "lucide-react";
 import { requireUser } from "@/lib/auth";
+import { canAccessSection } from "@/lib/section";
 import { prisma } from "@/lib/prisma";
 import { timeAgo } from "@/lib/utils";
 import { IDEA_STATUS, IDEA_CATEGORIES, type IdeaStatusKey } from "@/lib/constants";
@@ -33,6 +34,7 @@ export default async function IdeaDetailPage({
   });
 
   if (!idea) notFound();
+  if (!(await canAccessSection(idea.section))) notFound();
 
   const isOwner = idea.authorId === session.sub;
   const isAdmin = session.role === "ADMIN";

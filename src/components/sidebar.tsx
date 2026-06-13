@@ -14,12 +14,16 @@ import {
   ChevronLeft,
   ChevronRight,
   Lightbulb,
+  Columns3,
+  Rocket,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { NotificationBell } from "@/components/notification-bell";
+import { SectionSwitcher } from "@/components/section-switcher";
 import type { SessionPayload } from "@/lib/auth";
+import type { SectionKey } from "@/lib/constants";
 
 type NavItem = {
   href: string;
@@ -32,13 +36,23 @@ type NavItem = {
 const NAV: NavItem[] = [
   { href: "/", label: "Dashboard", icon: LayoutGrid, exact: true },
   { href: "/tasks", label: "Tareas", icon: ListChecks },
+  { href: "/board", label: "Tablero", icon: Columns3 },
+  { href: "/sprints", label: "Sprints", icon: Rocket },
   { href: "/calendar", label: "Calendario", icon: CalendarDays },
   { href: "/ideas", label: "Ideas", icon: Lightbulb },
   { href: "/tasks/new", label: "Nueva Tarea", icon: Plus, exact: true },
   { href: "/users", label: "Usuarios", icon: Users, adminOnly: true },
 ];
 
-export function Sidebar({ session }: { session: SessionPayload }) {
+export function Sidebar({
+  session,
+  sections,
+  activeSection,
+}: {
+  session: SessionPayload;
+  sections: SectionKey[];
+  activeSection: SectionKey | null;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -119,6 +133,13 @@ export function Sidebar({ session }: { session: SessionPayload }) {
             )}
           </button>
         </div>
+
+        {/* Selector de sección */}
+        {activeSection && (
+          <div className="border-b border-slate-800 px-2 py-2.5">
+            <SectionSwitcher allowed={sections} active={activeSection} collapsed={collapsed} />
+          </div>
+        )}
 
         {/* Nav */}
         <nav className="flex-1 space-y-1 px-2 py-3">

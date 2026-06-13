@@ -1,5 +1,25 @@
 // Etiquetas y estilos de estados, prioridades y vencimiento (en español).
 
+// Secciones independientes de la app.
+export const SECTION_META = {
+  ESCALAS_MEDICAS: {
+    label: "Escalas médicas",
+    short: "Escalas",
+    accent: "bg-teal-500",
+    badge: "bg-teal-50 text-teal-700 ring-teal-200 dark:bg-teal-900/30 dark:text-teal-300 dark:ring-teal-800",
+  },
+  PROGRAMACION: {
+    label: "Programación",
+    short: "Programación",
+    accent: "bg-blue-500",
+    badge: "bg-blue-50 text-blue-700 ring-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:ring-blue-800",
+  },
+} as const;
+
+export type SectionKey = keyof typeof SECTION_META;
+
+export const SECTION_ORDER: SectionKey[] = ["ESCALAS_MEDICAS", "PROGRAMACION"];
+
 export const STATUS = {
   PENDING: {
     label: "Pendiente",
@@ -12,6 +32,12 @@ export const STATUS = {
     dot: "bg-blue-500",
     solid: "bg-blue-600 hover:bg-blue-700",
     badge: "bg-blue-50 text-blue-700 ring-blue-200",
+  },
+  PAUSED: {
+    label: "Parada",
+    dot: "bg-rose-500",
+    solid: "bg-rose-600 hover:bg-rose-700",
+    badge: "bg-rose-50 text-rose-700 ring-rose-200",
   },
   USER_REVIEW: {
     label: "Revisión usuario",
@@ -35,6 +61,7 @@ export const STATUS = {
 
 export type StatusKey = keyof typeof STATUS;
 
+// Orden lineal del flujo. "PAUSED" queda fuera: es un estado lateral (pausa).
 export const STATUS_ORDER: StatusKey[] = [
   "PENDING",
   "IN_PROGRESS",
@@ -42,6 +69,35 @@ export const STATUS_ORDER: StatusKey[] = [
   "ADMIN_REVIEW",
   "DONE",
 ];
+
+// Columnas del tablero Kanban (incluye Parada).
+export const BOARD_COLUMNS: StatusKey[] = [
+  "PENDING",
+  "IN_PROGRESS",
+  "PAUSED",
+  "USER_REVIEW",
+  "ADMIN_REVIEW",
+  "DONE",
+];
+
+export const SPRINT_STATUS = {
+  PLANNED: {
+    label: "Planificado",
+    badge: "bg-slate-100 text-slate-600 ring-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:ring-slate-600",
+  },
+  ACTIVE: {
+    label: "Activo",
+    badge: "bg-blue-50 text-blue-700 ring-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:ring-blue-800",
+  },
+  COMPLETED: {
+    label: "Completado",
+    badge: "bg-emerald-50 text-emerald-700 ring-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:ring-emerald-800",
+  },
+} as const;
+
+export type SprintStatusKey = keyof typeof SPRINT_STATUS;
+
+export const SPRINT_STATUS_ORDER: SprintStatusKey[] = ["PLANNED", "ACTIVE", "COMPLETED"];
 
 export const PRIORITY = {
   LOW: {

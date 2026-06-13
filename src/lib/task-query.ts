@@ -1,4 +1,4 @@
-import { Prisma, TaskStatus, Priority } from "@prisma/client";
+import { Prisma, TaskStatus, Priority, Section } from "@prisma/client";
 
 export type TaskFilters = {
   q?: string;
@@ -8,11 +8,14 @@ export type TaskFilters = {
   from?: string;
   to?: string;
   showDone?: boolean;
+  section?: Section;
 };
 
 /** Construye el filtro Prisma a partir de los parámetros de búsqueda. */
 export function buildTaskWhere(f: TaskFilters): Prisma.TaskWhereInput {
   const where: Prisma.TaskWhereInput = {};
+
+  if (f.section) where.section = f.section;
 
   if (f.q) {
     where.OR = [

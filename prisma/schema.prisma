@@ -14,13 +14,28 @@ enum Role {
   USER
 }
 
+// Secciones independientes de la aplicación. Cada usuario accede a una o varias
+// y todo (tareas, ideas, sprints) queda separado por sección.
+enum Section {
+  ESCALAS_MEDICAS
+  PROGRAMACION
+}
+
 // Flujo de trabajo de un ticket.
 enum TaskStatus {
   PENDING      // Pendiente
   IN_PROGRESS  // En progreso
+  PAUSED       // Parada
   USER_REVIEW  // Revisión usuario
   ADMIN_REVIEW // Revisión admin
   DONE         // Producción / Finalizada
+}
+
+// Estado de un sprint.
+enum SprintStatus {
+  PLANNED   // Planificado
+  ACTIVE    // Activo
+  COMPLETED // Completado
 }
 
 enum Priority {
@@ -46,14 +61,17 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  createdTasks  Task[]         @relation("CreatedBy")
-  assignedTasks Task[]         @relation("AssignedTo")
-  comments      Comment[]
-  notifications Notification[]
-  activities    Activity[]
-  ideas         Idea[]
-  ideaVotes     IdeaVote[]
-  ideaComments  IdeaComment[]
+  sections Section[] @default([]) // secciones a las que tiene acceso
+
+  createdTasks       Task[]         @relation("CreatedBy")
+  assignedTasks      Task[]         @relation("AssignedTo")
+  collaboratingTasks Task[]         @relation("Collaborators")
+  comments           Comment[]
+  notifications      Notification[]
+  activities         Activity[]
+  ideas              Idea[]
+  ideaVotes          IdeaVote[]
+  ideaComments       IdeaComment[]
 }
 
 model Task {
@@ -62,10 +80,12 @@ model Task {
   description String?
   status      TaskStatus @default(PENDING)
   priority    Priority   @default(MEDIUM)
+  section     Section    @default(PROGRAMACION)
   hours       Float      @default(0)
   labels      String[]   @default([])
   dueBucket   DueBucket  @default(NONE)
   dueDate     DateTime?
+  startedAt   DateTime? // cuándo pasó a "En progreso" por primera vez
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
@@ -75,15 +95,38 @@ model Task {
   createdById String
   createdBy   User   @relation("CreatedBy", fields: [createdById], references: [id])
 
+  collaborators User[] @relation("Collaborators")
+
+  sprintId String?
+  sprint   Sprint? @relation(fields: [sprintId], references: [id], onDelete: SetNull)
+
   comments       Comment[]
   activities     Activity[]
   checklistItems ChecklistItem[]
 
   @@index([status])
   @@index([priority])
+  @@index([section])
   @@index([assigneeId])
+  @@index([sprintId])
   @@index([createdAt])
   @@index([dueDate])
+}
+
+// Sprint / entrega que agrupa tareas dentro de una sección.
+model Sprint {
+  id        String       @id @default(cuid())
+  name      String
+  goal      String?
+  status    SprintStatus @default(PLANNED)
+  section   Section
+  startDate DateTime?
+  endDate   DateTime?
+  createdAt DateTime     @default(now())
+
+  tasks Task[]
+
+  @@index([section])
 }
 
 model ChecklistItem {
@@ -165,6 +208,7 @@ model Idea {
   body      String?
   status    IdeaStatus @default(OPEN)
   category  String?
+  section   Section    @default(PROGRAMACION)
   links     String[]   @default([])
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
@@ -176,6 +220,7 @@ model Idea {
   comments IdeaComment[]
 
   @@index([status])
+  @@index([section])
   @@index([createdAt])
 }
 

@@ -8,6 +8,7 @@ const schema = z.object({
   email: z.string().min(3, "Email inválido"),
   password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
   role: z.enum(["ADMIN", "USER"]).optional(),
+  sections: z.array(z.enum(["ESCALAS_MEDICAS", "PROGRAMACION"])).optional(),
 });
 
 export async function POST(req: Request) {
@@ -38,6 +39,7 @@ export async function POST(req: Request) {
       email,
       password: await hashPassword(parsed.data.password),
       role: parsed.data.role ?? "USER",
+      sections: parsed.data.sections ?? [],
     },
   });
 

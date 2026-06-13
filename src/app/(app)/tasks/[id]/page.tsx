@@ -2,10 +2,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { ArrowLeft, Pencil, Calendar, CalendarClock, Clock, User, Flag } from "lucide-react";
+import { ArrowLeft, Pencil, Calendar, CalendarClock, Clock, User, Flag, Play, Users, Rocket } from "lucide-react";
 import { requireUser } from "@/lib/auth";
+import { canAccessSection, sectionUsers } from "@/lib/section";
 import { prisma } from "@/lib/prisma";
 import { PriorityBadge, LabelTag } from "@/components/badges";
+import { CollaboratorsManager } from "@/components/collaborators-manager";
+import { SprintSelect } from "@/components/sprint-select";
 import { StatusWorkflow } from "@/components/status-workflow";
 import { CommentForm } from "@/components/comment-form";
 import { DeleteTaskButton } from "@/components/delete-task-button";
@@ -64,6 +67,7 @@ export default async function TaskDetailPage({
     include: {
       assignee: { select: { name: true } },
       createdBy: { select: { name: true } },
+      collaborators: { select: { id: true, name: true }, orderBy: { name: "asc" } },
       comments: {
         include: { author: { select: { id: true, name: true } } },
         orderBy: { createdAt: "asc" },
@@ -79,6 +83,16 @@ export default async function TaskDetailPage({
     },
   });
   if (!task) notFound();
+  if (!(await canAccessSection(task.section))) notFound();
+
+  const [members, sprints] = await Promise.all([
+    sectionUsers(task.section),
+    prisma.sprint.findMany({
+      where: { section: task.section },
+      select: { id: true, name: true },
+      orderBy: { createdAt: "desc" },
+    }),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -189,6 +203,26 @@ export default async function TaskDetailPage({
 
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
             <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+              <Users className="h-4 w-4" />
+              Colaboradores
+            </h2>
+            <CollaboratorsManager
+              taskId={task.id}
+              collaborators={task.collaborators}
+              sectionUsers={members}
+            />
+          </section>
+
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+              <Rocket className="h-4 w-4" />
+              Sprint
+            </h2>
+            <SprintSelect taskId={task.id} sprintId={task.sprintId} sprints={sprints} />
+          </section>
+
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
               <CalendarClock className="h-4 w-4" />
               Planificación
             </h2>
@@ -216,6 +250,11 @@ export default async function TaskDetailPage({
               <Meta icon={Clock} label="Horas est.">
                 {task.hours}h
               </Meta>
+              {task.startedAt && (
+                <Meta icon={Play} label="Iniciada">
+                  {format(task.startedAt, "d MMM yyyy, HH:mm", { locale: es })}
+                </Meta>
+              )}
               <Meta icon={Calendar} label="Creada">
                 {format(task.createdAt, "d 'de' MMM yyyy", { locale: es })}
               </Meta>

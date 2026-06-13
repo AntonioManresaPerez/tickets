@@ -3,11 +3,42 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil, Trash2 } from "lucide-react";
+import { SECTION_META, SECTION_ORDER, type SectionKey } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 
-type U = { id: string; name: string; email: string; role: string; created: string };
+type U = {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  sections: string[];
+  created: string;
+};
 
 const inputClass =
   "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:focus:ring-blue-900/30";
+
+function SectionBadges({ sections }: { sections: string[] }) {
+  if (sections.length === 0) {
+    return <span className="text-xs text-slate-400">Sin acceso</span>;
+  }
+  return (
+    <span className="flex flex-wrap gap-1">
+      {sections.map((s) => {
+        const meta = SECTION_META[s as SectionKey];
+        if (!meta) return null;
+        return (
+          <span
+            key={s}
+            className={cn("rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset", meta.badge)}
+          >
+            {meta.short}
+          </span>
+        );
+      })}
+    </span>
+  );
+}
 
 function RoleBadge({ role }: { role: string }) {
   return (
@@ -26,14 +57,35 @@ function RoleBadge({ role }: { role: string }) {
 export function UsersManager({ users }: { users: U[] }) {
   const router = useRouter();
   const [editing, setEditing] = useState<string | null>(null);
-  const [form, setForm] = useState({ name: "", email: "", role: "USER", password: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    role: "USER",
+    password: "",
+    sections: [] as SectionKey[],
+  });
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   function startEdit(u: U) {
     setEditing(u.id);
-    setForm({ name: u.name, email: u.email, role: u.role, password: "" });
+    setForm({
+      name: u.name,
+      email: u.email,
+      role: u.role,
+      password: "",
+      sections: u.sections as SectionKey[],
+    });
     setError(null);
+  }
+
+  function toggleSection(s: SectionKey) {
+    setForm((prev) => ({
+      ...prev,
+      sections: prev.sections.includes(s)
+        ? prev.sections.filter((x) => x !== s)
+        : [...prev.sections, s],
+    }));
   }
 
   async function remove(id: string, name: string) {
@@ -50,10 +102,11 @@ export function UsersManager({ users }: { users: U[] }) {
   async function save(id: string) {
     setSaving(true);
     setError(null);
-    const payload: Record<string, string> = {
+    const payload: Record<string, unknown> = {
       name: form.name,
       email: form.email,
       role: form.role,
+      sections: form.sections,
     };
     if (form.password) payload.password = form.password;
 
@@ -117,6 +170,45 @@ export function UsersManager({ users }: { users: U[] }) {
           </div>
         </div>
 
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">
+            Secciones con acceso
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {SECTION_ORDER.map((s) => {
+              const checked = form.sections.includes(s);
+              return (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => toggleSection(s)}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition",
+                    checked
+                      ? "border-blue-500 bg-blue-50 text-blue-700 dark:border-blue-600 dark:bg-blue-900/30 dark:text-blue-300"
+                      : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "flex h-4 w-4 items-center justify-center rounded border text-[10px]",
+                      checked ? "border-blue-500 bg-blue-500 text-white" : "border-slate-300 dark:border-slate-500",
+                    )}
+                  >
+                    {checked && "✓"}
+                  </span>
+                  {SECTION_META[s].label}
+                </button>
+              );
+            })}
+          </div>
+          {form.role === "ADMIN" && (
+            <p className="mt-1.5 text-xs text-slate-400 dark:text-slate-500">
+              Los administradores acceden a todas las secciones igualmente.
+            </p>
+          )}
+        </div>
+
         {error && (
           <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 ring-1 ring-inset ring-red-200 dark:bg-red-900/20 dark:text-red-400 dark:ring-red-800">
             {error}
@@ -152,6 +244,9 @@ export function UsersManager({ users }: { users: U[] }) {
                 <div className="min-w-0">
                   <p className="font-medium text-slate-900 dark:text-slate-100">{u.name}</p>
                   <p className="truncate text-sm text-slate-500 dark:text-slate-400">{u.email}</p>
+                  <div className="mt-1.5">
+                    <SectionBadges sections={u.sections} />
+                  </div>
                   <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">Alta: {u.created}</p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
@@ -190,7 +285,12 @@ export function UsersManager({ users }: { users: U[] }) {
         {users.map((u) => (
           <div key={u.id} className="border-b border-slate-50 last:border-0 dark:border-slate-700/50">
             <div className="grid grid-cols-[1fr_1.4fr_8rem_7rem_7rem] items-center gap-3 px-5 py-3.5 text-sm">
-              <span className="font-medium text-slate-900">{u.name}</span>
+              <div className="min-w-0">
+                <span className="block font-medium text-slate-900 dark:text-slate-100">{u.name}</span>
+                <span className="mt-1 block">
+                  <SectionBadges sections={u.sections} />
+                </span>
+              </div>
               <span className="truncate text-slate-600">{u.email}</span>
               <span>
                 <RoleBadge role={u.role} />

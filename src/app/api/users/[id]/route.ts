@@ -8,6 +8,7 @@ const schema = z.object({
   email: z.string().min(3).optional(),
   role: z.enum(["ADMIN", "USER"]).optional(),
   password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres").optional(),
+  sections: z.array(z.enum(["ESCALAS_MEDICAS", "PROGRAMACION"])).optional(),
 });
 
 export async function PATCH(
@@ -64,6 +65,7 @@ export async function PATCH(
       ...(d.email !== undefined && { email: d.email.trim().toLowerCase() }),
       ...(d.role !== undefined && { role: d.role }),
       ...(d.password !== undefined && { password: await hashPassword(d.password) }),
+      ...(d.sections !== undefined && { sections: d.sections }),
     },
   });
 

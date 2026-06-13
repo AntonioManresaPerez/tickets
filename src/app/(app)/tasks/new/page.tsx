@@ -1,11 +1,13 @@
 import { requireUser } from "@/lib/auth";
+import { requireSection, sectionUsers } from "@/lib/section";
 import { prisma } from "@/lib/prisma";
 import { TaskForm } from "@/components/task-form";
 
 export default async function NewTaskPage() {
   const session = await requireUser();
+  const section = await requireSection();
   const [users, labels] = await Promise.all([
-    prisma.user.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
+    sectionUsers(section),
     prisma.label.findMany({ select: { name: true }, orderBy: { name: "asc" } }),
   ]);
 

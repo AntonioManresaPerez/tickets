@@ -1,14 +1,17 @@
 import Link from "next/link";
 import { Plus, MessageSquare, ThumbsUp, Link2, Lightbulb } from "lucide-react";
 import { requireUser } from "@/lib/auth";
+import { requireSection } from "@/lib/section";
 import { prisma } from "@/lib/prisma";
 import { timeAgo } from "@/lib/utils";
 import { IDEA_STATUS, IDEA_CATEGORIES, type IdeaStatusKey } from "@/lib/constants";
 
 export default async function IdeasPage() {
   const session = await requireUser();
+  const section = await requireSection();
 
   const ideas = await prisma.idea.findMany({
+    where: { section },
     orderBy: { createdAt: "desc" },
     include: {
       author: { select: { id: true, name: true } },

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
+import { getActiveSection } from "@/lib/section";
 import { logActivity, notify } from "@/lib/activity";
 
 const createSchema = z.object({
@@ -29,12 +30,18 @@ export async function POST(req: Request) {
   }
   const d = parsed.data;
 
+  const section = await getActiveSection();
+  if (!section) {
+    return NextResponse.json({ error: "Sin sección activa" }, { status: 403 });
+  }
+
   const task = await prisma.task.create({
     data: {
       title: d.title,
       description: d.description || null,
       status: "PENDING", // toda tarea nueva nace como Pendiente
       priority: d.priority ?? "MEDIUM",
+      section,
       hours: d.hours ?? 0,
       dueBucket: d.dueBucket ?? "NONE",
       dueDate: d.dueDate ? new Date(d.dueDate) : null,

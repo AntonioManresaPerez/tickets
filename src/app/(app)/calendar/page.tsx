@@ -1,12 +1,15 @@
 import { requireUser } from "@/lib/auth";
+import { requireSection } from "@/lib/section";
 import { prisma } from "@/lib/prisma";
 import { CalendarView } from "@/components/calendar-view";
 import type { StatusKey } from "@/lib/constants";
 
 export default async function CalendarPage() {
   await requireUser();
+  const section = await requireSection();
   const tasks = await prisma.task.findMany({
     where: {
+      section,
       OR: [
         { dueDate: { not: null } },
         { dueBucket: { in: ["TODAY", "WEEK"] } },

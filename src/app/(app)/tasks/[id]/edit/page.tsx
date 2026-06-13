@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
+import { canAccessSection, sectionUsers } from "@/lib/section";
 import { prisma } from "@/lib/prisma";
 import { TaskForm } from "@/components/task-form";
 
@@ -15,9 +16,10 @@ export default async function EditTaskPage({
 
   const task = await prisma.task.findUnique({ where: { id: taskId } });
   if (!task) notFound();
+  if (!(await canAccessSection(task.section))) notFound();
 
   const [users, labels] = await Promise.all([
-    prisma.user.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
+    sectionUsers(task.section),
     prisma.label.findMany({ select: { name: true }, orderBy: { name: "asc" } }),
   ]);
 

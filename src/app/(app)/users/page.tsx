@@ -9,7 +9,7 @@ export default async function UsersPage() {
   await requireAdmin();
   const users = await prisma.user.findMany({
     orderBy: { createdAt: "asc" },
-    select: { id: true, name: true, email: true, role: true, createdAt: true },
+    select: { id: true, name: true, email: true, role: true, sections: true, createdAt: true },
   });
 
   const data = users.map((u) => ({
@@ -17,6 +17,7 @@ export default async function UsersPage() {
     name: u.name,
     email: u.email,
     role: u.role,
+    sections: u.sections,
     created: format(u.createdAt, "d MMM yyyy", { locale: es }),
   }));
 
