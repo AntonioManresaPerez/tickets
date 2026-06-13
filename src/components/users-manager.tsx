@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil, Trash2 } from "lucide-react";
 import { SECTION_META, SECTION_ORDER, type SectionKey } from "@/lib/constants";
+import { useToast } from "@/components/ui/toast";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { cn } from "@/lib/utils";
 
 type U = {
@@ -56,6 +58,8 @@ function RoleBadge({ role }: { role: string }) {
 
 export function UsersManager({ users }: { users: U[] }) {
   const router = useRouter();
+  const { toast } = useToast();
+  const confirm = useConfirm();
   const [editing, setEditing] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: "",
@@ -89,13 +93,18 @@ export function UsersManager({ users }: { users: U[] }) {
   }
 
   async function remove(id: string, name: string) {
-    if (!confirm(`¿Eliminar al usuario "${name}"? Esta acción no se puede deshacer.`)) return;
+    const ok = await confirm({
+      title: "Eliminar usuario",
+      message: `Se eliminará a "${name}". Esta acción no se puede deshacer.`,
+    });
+    if (!ok) return;
     const res = await fetch(`/api/users/${id}`, { method: "DELETE" });
     if (res.ok) {
+      toast({ type: "success", message: "Usuario eliminado" });
       router.refresh();
     } else {
       const d = await res.json().catch(() => ({}));
-      alert(d.error ?? "No se pudo eliminar");
+      toast({ type: "error", message: d.error ?? "No se pudo eliminar" });
     }
   }
 

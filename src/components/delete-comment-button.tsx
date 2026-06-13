@@ -3,13 +3,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 
 export function DeleteCommentButton({ commentId }: { commentId: string }) {
   const router = useRouter();
+  const confirm = useConfirm();
   const [loading, setLoading] = useState(false);
 
   async function handleDelete() {
-    if (!confirm("¿Eliminar este comentario?")) return;
+    if (!(await confirm({ title: "Eliminar comentario", message: "Se borrará el comentario." }))) return;
     setLoading(true);
     await fetch(`/api/comments/${commentId}`, { method: "DELETE" });
     setLoading(false);

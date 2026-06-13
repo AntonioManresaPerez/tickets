@@ -79,6 +79,7 @@ model Task {
   title       String
   description String?
   status      TaskStatus @default(PENDING)
+  prevStatus  TaskStatus? // estado antes de "Parada", para volver a él al continuar
   priority    Priority   @default(MEDIUM)
   section     Section
   hours       Float      @default(0)

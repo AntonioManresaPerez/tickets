@@ -76,7 +76,7 @@ export function TaskFilters({
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-3 sm:contents">
+        <div className="grid grid-cols-1 gap-3 sm:contents">
           <select
             value={f.status}
             onChange={(e) => update({ status: e.target.value })}

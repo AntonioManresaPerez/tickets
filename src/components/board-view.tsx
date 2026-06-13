@@ -37,7 +37,7 @@ export function BoardView({ tasks: initial }: { tasks: BoardTask[] }) {
   }
 
   return (
-    <div className="flex gap-3 overflow-x-auto pb-4">
+    <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-4">
       {BOARD_COLUMNS.map((col) => {
         const colTasks = tasks.filter((t) => t.status === col);
         const meta = STATUS[col];
@@ -55,7 +55,7 @@ export function BoardView({ tasks: initial }: { tasks: BoardTask[] }) {
               setOverCol(null);
             }}
             className={cn(
-              "flex w-[17rem] shrink-0 flex-col rounded-2xl border bg-slate-50/60 p-2.5 transition dark:bg-slate-800/40",
+              "flex w-[80vw] shrink-0 snap-start flex-col rounded-2xl border bg-slate-50/60 p-2.5 transition sm:w-[17rem] dark:bg-slate-800/40",
               overCol === col
                 ? "border-blue-400 bg-blue-50/60 dark:border-blue-600 dark:bg-blue-900/20"
                 : "border-slate-200 dark:border-slate-700",
@@ -113,7 +113,8 @@ export function BoardView({ tasks: initial }: { tasks: BoardTask[] }) {
                   <select
                     value={t.status}
                     onChange={(e) => moveTo(t.id, e.target.value as StatusKey)}
-                    className="mt-2 w-full rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-600 outline-none lg:hidden dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300"
+                    aria-label="Cambiar estado"
+                    className="mt-2 w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2 text-sm text-slate-600 outline-none lg:hidden dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300"
                   >
                     {BOARD_COLUMNS.map((s) => (
                       <option key={s} value={s}>

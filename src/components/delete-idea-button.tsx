@@ -4,14 +4,17 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 
 export function DeleteIdeaButton({ ideaId }: { ideaId: string }) {
   const router = useRouter();
   const { toast } = useToast();
+  const confirm = useConfirm();
   const [loading, setLoading] = useState(false);
 
   async function handleDelete() {
-    if (!confirm("¿Eliminar esta idea? Esta acción no se puede deshacer.")) return;
+    const ok = await confirm({ title: "Eliminar idea", message: "Esta acción no se puede deshacer." });
+    if (!ok) return;
     setLoading(true);
     const res = await fetch(`/api/ideas/${ideaId}`, { method: "DELETE" });
     if (res.ok) {

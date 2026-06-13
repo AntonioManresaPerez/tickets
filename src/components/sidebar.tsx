@@ -16,6 +16,7 @@ import {
   Lightbulb,
   Columns3,
   Rocket,
+  Search,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -143,6 +144,25 @@ export function Sidebar({
 
         {/* Nav */}
         <nav className="flex-1 space-y-1 px-2 py-3">
+          <button
+            onClick={() => window.dispatchEvent(new Event("open-command-palette"))}
+            title="Buscar (Ctrl/⌘ K)"
+            className={cn(
+              "flex w-full items-center rounded-lg px-3 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white",
+              collapsed ? "lg:justify-center lg:px-0" : "gap-3",
+            )}
+          >
+            <Search className="h-4 w-4 shrink-0" />
+            <span className={cn("flex-1 text-left", collapsed && "lg:hidden")}>Buscar</span>
+            <kbd
+              className={cn(
+                "rounded border border-slate-700 px-1.5 py-0.5 text-[10px] text-slate-500",
+                collapsed && "lg:hidden",
+              )}
+            >
+              ⌘K
+            </kbd>
+          </button>
           <NotificationBell collapsed={collapsed} />
           {items.map((item) => {
             const active = item.exact

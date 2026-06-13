@@ -46,6 +46,11 @@ export function NotificationBell({ collapsed }: { collapsed: boolean }) {
     setNotifs((prev) => prev.map((n) => ({ ...n, read: true })));
   }
 
+  async function markRead(id: string) {
+    setNotifs((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    await fetch(`/api/notifications/${id}/read`, { method: "PATCH" });
+  }
+
   return (
     <div ref={ref} className="relative">
       <button
@@ -91,7 +96,10 @@ export function NotificationBell({ collapsed }: { collapsed: boolean }) {
                 <Link
                   key={n.id}
                   href={n.link ?? "#"}
-                  onClick={() => setOpen(false)}
+                  onClick={() => {
+                    if (!n.read) markRead(n.id);
+                    setOpen(false);
+                  }}
                   className={cn(
                     "block border-b border-slate-50 px-4 py-3 text-sm last:border-0 hover:bg-slate-50 dark:border-slate-700/50 dark:hover:bg-slate-700/50",
                     !n.read &&

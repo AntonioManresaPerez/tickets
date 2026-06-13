@@ -4,14 +4,20 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 
 export function DeleteSprintButton({ sprintId }: { sprintId: string }) {
   const router = useRouter();
   const { toast } = useToast();
+  const confirm = useConfirm();
   const [saving, setSaving] = useState(false);
 
   async function remove() {
-    if (!confirm("¿Eliminar este sprint? Las tareas quedarán sin sprint, no se borran.")) return;
+    const ok = await confirm({
+      title: "Eliminar sprint",
+      message: "Las tareas quedarán sin sprint, no se borran.",
+    });
+    if (!ok) return;
     setSaving(true);
     const res = await fetch(`/api/sprints/${sprintId}`, { method: "DELETE" });
     setSaving(false);

@@ -10,14 +10,18 @@ import { cn } from "@/lib/utils";
 export function StatusWorkflow({
   taskId,
   current,
+  prevStatus,
 }: {
   taskId: number;
   current: StatusKey;
+  prevStatus?: StatusKey | null;
 }) {
   const router = useRouter();
   const { toast } = useToast();
   const [status, setStatus] = useState<StatusKey>(current);
   const [saving, setSaving] = useState(false);
+  // Al continuar una tarea parada, volvemos a donde estaba (o a "En progreso").
+  const resumeTo: StatusKey = prevStatus && prevStatus !== "PAUSED" ? prevStatus : "IN_PROGRESS";
 
   async function move(to: StatusKey) {
     const before = status;
@@ -74,12 +78,12 @@ export function StatusWorkflow({
       {paused ? (
         <div className="flex flex-wrap items-center gap-2">
           <button
-            onClick={() => move("IN_PROGRESS")}
+            onClick={() => move(resumeTo)}
             disabled={saving}
             className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:opacity-60"
           >
             <Play className="h-4 w-4" />
-            Continuar
+            Continuar{resumeTo !== "IN_PROGRESS" ? ` (${STATUS[resumeTo].label})` : ""}
           </button>
           <p className="text-sm text-slate-400 dark:text-slate-500">La tarea está parada.</p>
         </div>

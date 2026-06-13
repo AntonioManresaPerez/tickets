@@ -4,6 +4,8 @@ import { Sidebar } from "@/components/sidebar";
 import { MobileNav } from "@/components/mobile-nav";
 import { PageTransition } from "@/components/page-transition";
 import { ToastProvider } from "@/components/ui/toast";
+import { ConfirmProvider } from "@/components/ui/confirm-dialog";
+import { CommandPalette } from "@/components/command-palette";
 import type { SectionKey } from "@/lib/constants";
 
 export default async function AppLayout({
@@ -16,6 +18,7 @@ export default async function AppLayout({
 
   return (
     <ToastProvider>
+      <ConfirmProvider>
       <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900">
         <Sidebar
           session={session}
@@ -28,7 +31,9 @@ export default async function AppLayout({
           </div>
         </main>
         <MobileNav session={session} />
+        <CommandPalette />
       </div>
+      </ConfirmProvider>
     </ToastProvider>
   );
 }

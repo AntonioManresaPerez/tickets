@@ -6,14 +6,40 @@ import { requireUser } from "@/lib/auth";
 import { requireSection } from "@/lib/section";
 import { prisma } from "@/lib/prisma";
 import { SprintForm } from "@/components/sprint-form";
-import { SPRINT_STATUS, type SprintStatusKey } from "@/lib/constants";
+import { SPRINT_STATUS, SPRINT_STATUS_ORDER, type SprintStatusKey } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 
-export default async function SprintsPage() {
+type SP = Record<string, string | string[] | undefined>;
+
+function SprintFilterPill({ label, href, active }: { label: string; href: string; active: boolean }) {
+  return (
+    <Link
+      href={href}
+      className={cn(
+        "rounded-full px-3 py-1.5 text-sm font-medium ring-1 ring-inset transition",
+        active
+          ? "bg-blue-600 text-white ring-blue-600"
+          : "bg-white text-slate-600 ring-slate-200 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-700",
+      )}
+    >
+      {label}
+    </Link>
+  );
+}
+
+export default async function SprintsPage({ searchParams }: { searchParams: Promise<SP> }) {
   await requireUser();
   const section = await requireSection();
+  const sp = await searchParams;
+  const statusFilter = (Array.isArray(sp.status) ? sp.status[0] : sp.status) as
+    | SprintStatusKey
+    | undefined;
 
   const sprints = await prisma.sprint.findMany({
-    where: { section },
+    where: {
+      section,
+      ...(statusFilter && SPRINT_STATUS[statusFilter] ? { status: statusFilter } : {}),
+    },
     orderBy: [{ status: "asc" }, { createdAt: "desc" }],
     include: {
       _count: { select: { tasks: true } },
@@ -28,6 +54,18 @@ export default async function SprintsPage() {
         <p className="mt-1 text-slate-500 dark:text-slate-400">
           Agrupa tareas en entregas con objetivo y fechas
         </p>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <SprintFilterPill label="Todos" href="/sprints" active={!statusFilter} />
+        {SPRINT_STATUS_ORDER.map((s) => (
+          <SprintFilterPill
+            key={s}
+            label={SPRINT_STATUS[s].label}
+            href={`/sprints?status=${s}`}
+            active={statusFilter === s}
+          />
+        ))}
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">

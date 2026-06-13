@@ -140,7 +140,11 @@ export default async function TaskDetailPage({
         <div className="space-y-4 lg:col-span-2">
           <section className={cardClass}>
             <h2 className={titleClass}>Estado</h2>
-            <StatusWorkflow taskId={task.id} current={task.status as StatusKey} />
+            <StatusWorkflow
+              taskId={task.id}
+              current={task.status as StatusKey}
+              prevStatus={task.prevStatus as StatusKey | null}
+            />
           </section>
 
           <section className={cardClass}>

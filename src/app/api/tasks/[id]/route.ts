@@ -54,6 +54,8 @@ export async function PATCH(
       ...(d.title !== undefined && { title: d.title }),
       ...(d.description !== undefined && { description: d.description }),
       ...(d.status !== undefined && { status: d.status }),
+      // Al pasar a "Parada" recordamos el estado anterior para poder volver a él.
+      ...(d.status === "PAUSED" && existing.status !== "PAUSED" && { prevStatus: existing.status }),
       // La primera vez que pasa a "En progreso" guardamos cuándo se inició.
       ...(d.status === "IN_PROGRESS" && !existing.startedAt && { startedAt: new Date() }),
       ...(d.priority !== undefined && { priority: d.priority }),

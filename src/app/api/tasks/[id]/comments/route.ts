@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
-import { canAccessSection } from "@/lib/section";
-import { logActivity, notify } from "@/lib/activity";
+import { canAccessSection, sectionUsers } from "@/lib/section";
+import { logActivity, notifyMany, mentionedUserIds } from "@/lib/activity";
 
 const schema = z.object({ body: z.string().min(1, "El comentario no puede estar vacío") });
 
@@ -31,7 +31,14 @@ export async function POST(
 
   const task = await prisma.task.findUnique({
     where: { id: taskId },
-    select: { id: true, title: true, section: true, createdById: true, assigneeId: true },
+    select: {
+      id: true,
+      title: true,
+      section: true,
+      createdById: true,
+      assigneeId: true,
+      collaborators: { select: { id: true } },
+    },
   });
   if (!task) return NextResponse.json({ error: "No encontrada" }, { status: 404 });
   if (!(await canAccessSection(task.section))) {
@@ -43,18 +50,26 @@ export async function POST(
   });
   await logActivity({ taskId, userId: session.sub, action: "COMMENTED" });
 
-  // Avisar a las personas implicadas (creador y asignado), salvo al propio autor.
+  // Avisar a las personas implicadas (creador, asignado y colaboradores), salvo al autor.
   const recipients = new Set<string>();
   if (task.createdById) recipients.add(task.createdById);
   if (task.assigneeId) recipients.add(task.assigneeId);
+  for (const c of task.collaborators) recipients.add(c.id);
   recipients.delete(session.sub);
-  for (const userId of recipients) {
-    await notify(
-      userId,
-      `${session.name} comentó en la tarea #${taskId}`,
-      `/tasks/${taskId}`,
-    );
-  }
+  await notifyMany(
+    recipients,
+    `${session.name} comentó en la tarea #${taskId}`,
+    `/tasks/${taskId}`,
+  );
+
+  // Avisar a los usuarios mencionados con @ que aún no estén en la lista.
+  const mentioned = mentionedUserIds(parsed.data.body, await sectionUsers(task.section))
+    .filter((uid) => uid !== session.sub && !recipients.has(uid));
+  await notifyMany(
+    mentioned,
+    `${session.name} te mencionó en la tarea #${taskId}`,
+    `/tasks/${taskId}`,
+  );
 
   return NextResponse.json({ ok: true }, { status: 201 });
 }

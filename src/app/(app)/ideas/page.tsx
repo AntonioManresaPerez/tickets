@@ -5,14 +5,37 @@ import { requireSection } from "@/lib/section";
 import { prisma } from "@/lib/prisma";
 import { timeAgo } from "@/lib/utils";
 import { IDEA_STATUS, IDEA_CATEGORIES, type IdeaStatusKey } from "@/lib/constants";
+import { IdeaFilters } from "@/components/idea-filters";
+import type { Prisma } from "@prisma/client";
 
-export default async function IdeasPage() {
+type SP = Record<string, string | string[] | undefined>;
+function str(v: string | string[] | undefined): string | undefined {
+  return Array.isArray(v) ? v[0] : v;
+}
+
+export default async function IdeasPage({ searchParams }: { searchParams: Promise<SP> }) {
   const session = await requireUser();
   const section = await requireSection();
+  const sp = await searchParams;
+
+  const q = str(sp.q);
+  const status = str(sp.status);
+  const category = str(sp.category);
+  const sort = str(sp.sort);
+
+  const where: Prisma.IdeaWhereInput = { section };
+  if (q) {
+    where.OR = [
+      { title: { contains: q, mode: "insensitive" } },
+      { body: { contains: q, mode: "insensitive" } },
+    ];
+  }
+  if (status) where.status = status as IdeaStatusKey;
+  if (category) where.category = category;
 
   const ideas = await prisma.idea.findMany({
-    where: { section },
-    orderBy: { createdAt: "desc" },
+    where,
+    orderBy: sort === "votes" ? { votes: { _count: "desc" } } : { createdAt: "desc" },
     include: {
       author: { select: { id: true, name: true } },
       _count: { select: { votes: true, comments: true } },
@@ -39,6 +62,8 @@ export default async function IdeasPage() {
           Nueva idea
         </Link>
       </div>
+
+      <IdeaFilters initial={{ q, status, category, sort }} />
 
       {ideas.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-slate-200 p-12 text-center dark:border-slate-700">

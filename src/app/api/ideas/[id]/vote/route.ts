@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireUser } from "@/lib/auth";
 import { canAccessSection } from "@/lib/section";
+import { notify } from "@/lib/activity";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(
@@ -30,5 +31,8 @@ export async function POST(
   await prisma.ideaVote.create({
     data: { userId: session.sub, ideaId: id },
   });
+  if (idea.authorId !== session.sub) {
+    await notify(idea.authorId, `${session.name} votó tu idea "${idea.title}"`, `/ideas/${id}`);
+  }
   return NextResponse.json({ voted: true });
 }

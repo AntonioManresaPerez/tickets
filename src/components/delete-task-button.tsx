@@ -4,14 +4,20 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 
 export function DeleteTaskButton({ taskId }: { taskId: number }) {
   const router = useRouter();
   const { toast } = useToast();
+  const confirm = useConfirm();
   const [busy, setBusy] = useState(false);
 
   async function del() {
-    if (!confirm("¿Eliminar esta tarea? Esta acción no se puede deshacer.")) return;
+    const ok = await confirm({
+      title: "Eliminar tarea",
+      message: "Esta acción no se puede deshacer.",
+    });
+    if (!ok) return;
     setBusy(true);
     const res = await fetch(`/api/tasks/${taskId}`, { method: "DELETE" });
     if (res.ok) {
