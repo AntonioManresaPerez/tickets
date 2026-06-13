@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
+import { canAccessSection } from "@/lib/section";
 
 export async function DELETE(
   _req: Request,
@@ -10,8 +11,14 @@ export async function DELETE(
   if (!session) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
 
   const { id } = await params;
-  const comment = await prisma.comment.findUnique({ where: { id } });
+  const comment = await prisma.comment.findUnique({
+    where: { id },
+    include: { task: { select: { section: true } } },
+  });
   if (!comment) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
+  if (!(await canAccessSection(comment.task.section))) {
+    return NextResponse.json({ error: "Sin acceso" }, { status: 403 });
+  }
 
   const canDelete = session.role === "ADMIN" || comment.authorId === session.sub;
   if (!canDelete) {

@@ -80,7 +80,7 @@ model Task {
   description String?
   status      TaskStatus @default(PENDING)
   priority    Priority   @default(MEDIUM)
-  section     Section    @default(PROGRAMACION)
+  section     Section
   hours       Float      @default(0)
   labels      String[]   @default([])
   dueBucket   DueBucket  @default(NONE)
@@ -208,7 +208,7 @@ model Idea {
   body      String?
   status    IdeaStatus @default(OPEN)
   category  String?
-  section   Section    @default(PROGRAMACION)
+  section   Section
   links     String[]   @default([])
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth";
+import { canAccessSection } from "@/lib/section";
 import { prisma } from "@/lib/prisma";
 import { notify } from "@/lib/activity";
 import { IDEA_STATUS, type IdeaStatusKey } from "@/lib/constants";
@@ -23,6 +24,9 @@ export async function GET(
     },
   });
   if (!idea) return NextResponse.json({ error: "No encontrada" }, { status: 404 });
+  if (!(await canAccessSection(idea.section))) {
+    return NextResponse.json({ error: "Sin acceso" }, { status: 403 });
+  }
   return NextResponse.json(idea);
 }
 
@@ -43,6 +47,9 @@ export async function PATCH(
 
   const idea = await prisma.idea.findUnique({ where: { id } });
   if (!idea) return NextResponse.json({ error: "No encontrada" }, { status: 404 });
+  if (!(await canAccessSection(idea.section))) {
+    return NextResponse.json({ error: "Sin acceso" }, { status: 403 });
+  }
 
   if (idea.authorId !== session.sub && session.role !== "ADMIN") {
     return NextResponse.json({ error: "Sin permiso" }, { status: 403 });
@@ -91,6 +98,9 @@ export async function DELETE(
 
   const idea = await prisma.idea.findUnique({ where: { id } });
   if (!idea) return NextResponse.json({ error: "No encontrada" }, { status: 404 });
+  if (!(await canAccessSection(idea.section))) {
+    return NextResponse.json({ error: "Sin acceso" }, { status: 403 });
+  }
 
   if (idea.authorId !== session.sub && session.role !== "ADMIN") {
     return NextResponse.json({ error: "Sin permiso" }, { status: 403 });

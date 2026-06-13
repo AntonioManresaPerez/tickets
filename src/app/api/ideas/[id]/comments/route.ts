@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth";
+import { canAccessSection } from "@/lib/section";
 import { prisma } from "@/lib/prisma";
 
 const schema = z.object({
@@ -16,6 +17,9 @@ export async function POST(
 
   const idea = await prisma.idea.findUnique({ where: { id } });
   if (!idea) return NextResponse.json({ error: "No encontrada" }, { status: 404 });
+  if (!(await canAccessSection(idea.section))) {
+    return NextResponse.json({ error: "Sin acceso" }, { status: 403 });
+  }
 
   const body = await req.json().catch(() => null);
   const d = schema.safeParse(body);

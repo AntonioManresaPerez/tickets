@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
+import { canAccessSection } from "@/lib/section";
 import { logActivity, notify } from "@/lib/activity";
 
 const schema = z.object({ body: z.string().min(1, "El comentario no puede estar vacío") });
@@ -30,9 +31,12 @@ export async function POST(
 
   const task = await prisma.task.findUnique({
     where: { id: taskId },
-    select: { id: true, title: true, createdById: true, assigneeId: true },
+    select: { id: true, title: true, section: true, createdById: true, assigneeId: true },
   });
   if (!task) return NextResponse.json({ error: "No encontrada" }, { status: 404 });
+  if (!(await canAccessSection(task.section))) {
+    return NextResponse.json({ error: "Sin acceso" }, { status: 403 });
+  }
 
   await prisma.comment.create({
     data: { taskId, authorId: session.sub, body: parsed.data.body },

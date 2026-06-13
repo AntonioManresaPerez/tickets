@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireUser } from "@/lib/auth";
+import { canAccessSection } from "@/lib/section";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(
@@ -11,6 +12,9 @@ export async function POST(
 
   const idea = await prisma.idea.findUnique({ where: { id } });
   if (!idea) return NextResponse.json({ error: "No encontrada" }, { status: 404 });
+  if (!(await canAccessSection(idea.section))) {
+    return NextResponse.json({ error: "Sin acceso" }, { status: 403 });
+  }
 
   const existing = await prisma.ideaVote.findUnique({
     where: { userId_ideaId: { userId: session.sub, ideaId: id } },

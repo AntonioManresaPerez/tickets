@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
+import { canAccessSection } from "@/lib/section";
 import { logActivity, notify } from "@/lib/activity";
 import { STATUS } from "@/lib/constants";
 
@@ -33,6 +34,9 @@ export async function PATCH(
 
   const existing = await prisma.task.findUnique({ where: { id: taskId } });
   if (!existing) return NextResponse.json({ error: "No encontrada" }, { status: 404 });
+  if (!(await canAccessSection(existing.section))) {
+    return NextResponse.json({ error: "Sin acceso" }, { status: 403 });
+  }
 
   const body = await req.json().catch(() => null);
   const parsed = updateSchema.safeParse(body);
@@ -102,6 +106,15 @@ export async function DELETE(
   const taskId = Number(id);
   if (Number.isNaN(taskId)) {
     return NextResponse.json({ error: "ID inválido" }, { status: 400 });
+  }
+
+  const existing = await prisma.task.findUnique({
+    where: { id: taskId },
+    select: { section: true },
+  });
+  if (!existing) return NextResponse.json({ error: "No encontrada" }, { status: 404 });
+  if (!(await canAccessSection(existing.section))) {
+    return NextResponse.json({ error: "Sin acceso" }, { status: 403 });
   }
 
   await prisma.task.delete({ where: { id: taskId } });
