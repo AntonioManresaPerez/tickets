@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { UserCheck } from "lucide-react";
+import { Avatar } from "@/components/avatar";
 
 export function AssignToMe({
   taskId,
@@ -32,9 +33,13 @@ export function AssignToMe({
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-200 text-sm font-semibold text-slate-600 dark:bg-slate-600 dark:text-slate-300">
-          {assigneeName ? assigneeName.charAt(0).toUpperCase() : "—"}
-        </div>
+        {assigneeName ? (
+          <Avatar name={assigneeName} size="md" />
+        ) : (
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-200 text-sm font-semibold text-slate-400 dark:bg-slate-600 dark:text-slate-300">
+            —
+          </span>
+        )}
         <div>
           <p className="text-xs text-slate-400 dark:text-slate-500">Asignada a</p>
           <p className="font-medium text-slate-900 dark:text-slate-100">{assigneeName ?? "Sin asignar"}</p>

@@ -13,12 +13,12 @@ import { AssignToMe } from "@/components/assign-to-me";
 import { Checklist } from "@/components/checklist";
 import { InlineDescription } from "@/components/inline-description";
 import { DeleteCommentButton } from "@/components/delete-comment-button";
+import { TaskScheduler } from "@/components/task-scheduler";
+import { Avatar } from "@/components/avatar";
 import { timeAgo } from "@/lib/utils";
 import {
-  DUE_BUCKET,
   type PriorityKey,
   type StatusKey,
-  type DueBucketKey,
 } from "@/lib/constants";
 
 const ACTION_LABELS: Record<string, string> = {
@@ -150,9 +150,7 @@ export default async function TaskDetailPage({
               ) : (
                 task.comments.map((c) => (
                   <div key={c.id} className="group flex gap-3">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-200 text-xs font-semibold text-slate-600 dark:bg-slate-600 dark:text-slate-300">
-                      {c.author.name.charAt(0).toUpperCase()}
-                    </div>
+                    <Avatar name={c.author.name} size="sm" />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
@@ -190,6 +188,18 @@ export default async function TaskDetailPage({
           </section>
 
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+              <CalendarClock className="h-4 w-4" />
+              Planificación
+            </h2>
+            <TaskScheduler
+              taskId={task.id}
+              dueDate={task.dueDate ? task.dueDate.toISOString() : null}
+              dueBucket={task.dueBucket}
+            />
+          </section>
+
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
             <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
               Detalles
             </h2>
@@ -198,12 +208,10 @@ export default async function TaskDetailPage({
                 <PriorityBadge priority={task.priority as PriorityKey} />
               </Meta>
               <Meta icon={User} label="Creada por">
-                {task.createdBy.name}
-              </Meta>
-              <Meta icon={CalendarClock} label="Vencimiento">
-                {task.dueDate
-                  ? format(task.dueDate, "d MMM yyyy", { locale: es })
-                  : DUE_BUCKET[task.dueBucket as DueBucketKey].label}
+                <span className="flex items-center gap-2">
+                  <Avatar name={task.createdBy.name} size="xs" />
+                  {task.createdBy.name}
+                </span>
               </Meta>
               <Meta icon={Clock} label="Horas est.">
                 {task.hours}h
