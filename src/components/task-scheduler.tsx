@@ -65,32 +65,34 @@ export function TaskScheduler({
       {planned}
 
       <div className="flex flex-col gap-2">
-        <button
-          type="button"
-          disabled={saving}
-          onClick={() => save({ dueBucket: "TODAY", dueDate: todayISO })}
-          className={cn(
-            btn,
-            isToday
-              ? "border-blue-600 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-              : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600",
-          )}
-        >
-          Hoy
-        </button>
-        <button
-          type="button"
-          disabled={saving}
-          onClick={() => save({ dueBucket: "WEEK", dueDate: toISODate(endOfWeek()) })}
-          className={cn(
-            btn,
-            dueBucket === "WEEK" && !isToday
-              ? "border-blue-600 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-              : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600",
-          )}
-        >
-          Esta semana
-        </button>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            disabled={saving}
+            onClick={() => save({ dueBucket: "TODAY", dueDate: todayISO })}
+            className={cn(
+              btn,
+              isToday
+                ? "border-blue-600 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600",
+            )}
+          >
+            Hoy
+          </button>
+          <button
+            type="button"
+            disabled={saving}
+            onClick={() => save({ dueBucket: "WEEK", dueDate: toISODate(endOfWeek()) })}
+            className={cn(
+              btn,
+              dueBucket === "WEEK" && !isToday
+                ? "border-blue-600 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600",
+            )}
+          >
+            Esta semana
+          </button>
+        </div>
 
         <label className="flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
           <CalendarClock className="h-4 w-4 shrink-0 text-slate-400" />

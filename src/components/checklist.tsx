@@ -46,9 +46,9 @@ export function Checklist({ taskId, items }: { taskId: number; items: Item[] }) 
   }
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+    <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+      <div className="mb-2.5 flex items-center justify-between">
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
           Checklist
           {items.length > 0 && (
             <span className="ml-2 font-normal text-slate-400">

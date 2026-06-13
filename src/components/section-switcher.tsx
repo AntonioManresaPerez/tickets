@@ -48,8 +48,12 @@ export function SectionSwitcher({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ section }),
     });
-    setSaving(false);
-    router.refresh();
+    // Recarga completa con los datos de la nueva sección. Si estamos dentro de
+    // una tarea/idea/sprint concretos (que no existen en la otra sección),
+    // volvemos a su listado para evitar un "no encontrado".
+    const path = window.location.pathname;
+    const detail = /^\/(tasks|ideas|sprints)\/.+/.exec(path);
+    window.location.assign(detail ? `/${detail[1]}` : path);
   }
 
   return (
