@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ArrowRight, ArrowLeft, Check, Pause, Play } from "lucide-react";
 import { STATUS, STATUS_ORDER, type StatusKey } from "@/lib/constants";
+import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 
 export function StatusWorkflow({
@@ -14,6 +15,7 @@ export function StatusWorkflow({
   current: StatusKey;
 }) {
   const router = useRouter();
+  const { toast } = useToast();
   const [status, setStatus] = useState<StatusKey>(current);
   const [saving, setSaving] = useState(false);
 
@@ -27,8 +29,13 @@ export function StatusWorkflow({
       body: JSON.stringify({ status: to }),
     });
     setSaving(false);
-    if (res.ok) router.refresh();
-    else setStatus(before);
+    if (res.ok) {
+      toast({ type: "success", message: `Estado: ${STATUS[to].label}` });
+      router.refresh();
+    } else {
+      setStatus(before);
+      toast({ type: "error", message: "No se pudo cambiar el estado" });
+    }
   }
 
   const paused = status === "PAUSED";

@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { buildTaskWhere } from "@/lib/task-query";
 import { TaskFilters } from "@/components/task-filters";
 import { StatusBadge, PriorityBadge, LabelTag } from "@/components/badges";
+import { Avatar } from "@/components/avatar";
 import { timeAgo, dueDateAlert } from "@/lib/utils";
 import type { StatusKey, PriorityKey } from "@/lib/constants";
 
@@ -103,7 +104,8 @@ export default async function TasksPage({
                 <div className="mt-3 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <PriorityBadge priority={t.priority as PriorityKey} />
-                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                    <span className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                      {t.assignee && <Avatar name={t.assignee.name} size="xs" />}
                       {t.assignee?.name ?? "Sin asignar"}
                     </span>
                   </div>
@@ -164,7 +166,8 @@ export default async function TasksPage({
               <span>
                 <PriorityBadge priority={t.priority as PriorityKey} />
               </span>
-              <span className="truncate text-slate-600">
+              <span className="flex items-center gap-1.5 truncate text-slate-600 dark:text-slate-300">
+                {t.assignee && <Avatar name={t.assignee.name} size="xs" />}
                 {t.assignee?.name ?? "Sin asignar"}
               </span>
               <span className="text-right text-xs text-slate-400">

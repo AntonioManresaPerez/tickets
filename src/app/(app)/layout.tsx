@@ -3,6 +3,7 @@ import { getSectionContext } from "@/lib/section";
 import { Sidebar } from "@/components/sidebar";
 import { MobileNav } from "@/components/mobile-nav";
 import { PageTransition } from "@/components/page-transition";
+import { ToastProvider } from "@/components/ui/toast";
 import type { SectionKey } from "@/lib/constants";
 
 export default async function AppLayout({
@@ -14,18 +15,20 @@ export default async function AppLayout({
   const { allowed, active } = await getSectionContext();
 
   return (
-    <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900">
-      <Sidebar
-        session={session}
-        sections={allowed as SectionKey[]}
-        activeSection={active as SectionKey | null}
-      />
-      <main className="flex-1 overflow-x-hidden">
-        <div className="mx-auto max-w-7xl px-4 pb-24 pt-16 sm:px-6 sm:pt-8 lg:px-8 lg:pb-8">
-          <PageTransition>{children}</PageTransition>
-        </div>
-      </main>
-      <MobileNav session={session} />
-    </div>
+    <ToastProvider>
+      <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900">
+        <Sidebar
+          session={session}
+          sections={allowed as SectionKey[]}
+          activeSection={active as SectionKey | null}
+        />
+        <main className="flex-1 overflow-x-hidden">
+          <div className="mx-auto max-w-7xl px-4 pb-24 pt-16 sm:px-6 sm:pt-8 lg:px-8 lg:pb-8">
+            <PageTransition>{children}</PageTransition>
+          </div>
+        </main>
+        <MobileNav session={session} />
+      </div>
+    </ToastProvider>
   );
 }

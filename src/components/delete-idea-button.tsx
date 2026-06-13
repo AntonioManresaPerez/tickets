@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
+import { useToast } from "@/components/ui/toast";
 
 export function DeleteIdeaButton({ ideaId }: { ideaId: string }) {
   const router = useRouter();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
   async function handleDelete() {
@@ -13,11 +15,12 @@ export function DeleteIdeaButton({ ideaId }: { ideaId: string }) {
     setLoading(true);
     const res = await fetch(`/api/ideas/${ideaId}`, { method: "DELETE" });
     if (res.ok) {
+      toast({ type: "success", message: "Idea eliminada" });
       router.push("/ideas");
       router.refresh();
     } else {
       setLoading(false);
-      alert("No se pudo eliminar la idea");
+      toast({ type: "error", message: "No se pudo eliminar la idea" });
     }
   }
 

@@ -3,9 +3,11 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
+import { useToast } from "@/components/ui/toast";
 
 export function DeleteTaskButton({ taskId }: { taskId: number }) {
   const router = useRouter();
+  const { toast } = useToast();
   const [busy, setBusy] = useState(false);
 
   async function del() {
@@ -13,11 +15,12 @@ export function DeleteTaskButton({ taskId }: { taskId: number }) {
     setBusy(true);
     const res = await fetch(`/api/tasks/${taskId}`, { method: "DELETE" });
     if (res.ok) {
+      toast({ type: "success", message: "Tarea eliminada" });
       router.push("/tasks");
       router.refresh();
     } else {
       setBusy(false);
-      alert("No se pudo eliminar la tarea.");
+      toast({ type: "error", message: "No se pudo eliminar la tarea" });
     }
   }
 

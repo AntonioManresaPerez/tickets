@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { UserPlus } from "lucide-react";
 import { SECTION_META, SECTION_ORDER, type SectionKey } from "@/lib/constants";
+import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 
 const inputClass =
@@ -11,6 +12,7 @@ const inputClass =
 
 export function UserForm() {
   const router = useRouter();
+  const { toast } = useToast();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -42,10 +44,12 @@ export function UserForm() {
       setRole("USER");
       setSections(["PROGRAMACION"]);
       setOk(true);
+      toast({ type: "success", message: "Usuario creado" });
       router.refresh();
     } else {
       const data = await res.json().catch(() => ({}));
       setError(data.error ?? "No se pudo crear el usuario");
+      toast({ type: "error", message: data.error ?? "No se pudo crear el usuario" });
     }
   }
 

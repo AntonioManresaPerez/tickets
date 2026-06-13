@@ -9,6 +9,7 @@ import {
   DUE_BUCKET,
   DUE_BUCKET_ORDER,
 } from "@/lib/constants";
+import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 
 type UserOpt = { id: string; name: string };
@@ -54,6 +55,7 @@ export function TaskForm({
   task?: TaskFormValues;
 }) {
   const router = useRouter();
+  const { toast } = useToast();
   const [v, setV] = useState<TaskFormValues>(task ?? empty);
   const [labels, setLabels] = useState<string[]>(availableLabels);
   const [newLabel, setNewLabel] = useState("");
@@ -127,11 +129,13 @@ export function TaskForm({
     if (res.ok) {
       const data = await res.json().catch(() => ({}));
       const id = mode === "create" ? data.id : task!.id;
+      toast({ type: "success", message: mode === "create" ? "Tarea creada" : "Tarea guardada" });
       router.push(`/tasks/${id}`);
       router.refresh();
     } else {
       const data = await res.json().catch(() => ({}));
       setError(data.error ?? "No se pudo guardar");
+      toast({ type: "error", message: data.error ?? "No se pudo guardar" });
       setSaving(false);
     }
   }

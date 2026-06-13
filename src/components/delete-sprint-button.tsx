@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
+import { useToast } from "@/components/ui/toast";
 
 export function DeleteSprintButton({ sprintId }: { sprintId: string }) {
   const router = useRouter();
+  const { toast } = useToast();
   const [saving, setSaving] = useState(false);
 
   async function remove() {
@@ -14,10 +16,11 @@ export function DeleteSprintButton({ sprintId }: { sprintId: string }) {
     const res = await fetch(`/api/sprints/${sprintId}`, { method: "DELETE" });
     setSaving(false);
     if (res.ok) {
+      toast({ type: "success", message: "Sprint eliminado" });
       router.push("/sprints");
       router.refresh();
     } else {
-      alert("No se pudo eliminar el sprint");
+      toast({ type: "error", message: "No se pudo eliminar el sprint" });
     }
   }
 
