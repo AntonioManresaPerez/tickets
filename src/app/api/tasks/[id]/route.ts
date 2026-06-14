@@ -17,6 +17,7 @@ const updateSchema = z.object({
   dueBucket: z.enum(["NONE", "TODAY", "WEEK"]).optional(),
   dueDate: z.string().nullable().optional(),
   labels: z.array(z.string()).optional(),
+  links: z.array(z.string()).optional(),
 });
 
 export async function PATCH(
@@ -63,6 +64,7 @@ export async function PATCH(
       ...(d.dueBucket !== undefined && { dueBucket: d.dueBucket }),
       ...(d.dueDate !== undefined && { dueDate: d.dueDate ? new Date(d.dueDate) : null }),
       ...(d.labels !== undefined && { labels: d.labels }),
+      ...(d.links !== undefined && { links: d.links.filter(Boolean) }),
       ...(d.assigneeId !== undefined && { assigneeId: d.assigneeId || null }),
       ...(d.sprintId !== undefined && { sprintId: d.sprintId || null }),
     },

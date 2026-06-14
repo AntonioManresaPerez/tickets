@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { ArrowLeft, Pencil, Calendar, CalendarClock, Clock, User, Flag, Play, Users, Rocket } from "lucide-react";
+import { ArrowLeft, Pencil, Calendar, CalendarClock, Clock, User, Flag, Play, Users, Rocket, Link2 } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { canAccessSection, sectionUsers } from "@/lib/section";
 import { prisma } from "@/lib/prisma";
@@ -15,6 +15,7 @@ import { DeleteTaskButton } from "@/components/delete-task-button";
 import { AssignToMe } from "@/components/assign-to-me";
 import { Checklist } from "@/components/checklist";
 import { Subtasks } from "@/components/subtasks";
+import { TaskLinks } from "@/components/task-links";
 import { InlineDescription } from "@/components/inline-description";
 import { DeleteCommentButton } from "@/components/delete-comment-button";
 import { TaskScheduler } from "@/components/task-scheduler";
@@ -161,6 +162,14 @@ export default async function TaskDetailPage({
           <section className={cardClass}>
             <h2 className={titleClass}>Descripción</h2>
             <InlineDescription taskId={task.id} description={task.description ?? null} />
+          </section>
+
+          <section className={cardClass}>
+            <h2 className={titleClass}>
+              <Link2 className="h-3.5 w-3.5" />
+              Enlaces
+            </h2>
+            <TaskLinks taskId={task.id} links={task.links} />
           </section>
 
           <Subtasks

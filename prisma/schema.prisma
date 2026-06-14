@@ -84,6 +84,7 @@ model Task {
   section     Section
   hours       Float      @default(0)
   labels      String[]   @default([])
+  links       String[]   @default([])
   dueBucket   DueBucket  @default(NONE)
   dueDate     DateTime?
   startedAt   DateTime? // cuándo pasó a "En progreso" por primera vez
