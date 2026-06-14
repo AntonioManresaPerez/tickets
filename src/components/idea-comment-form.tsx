@@ -2,8 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { MentionTextarea } from "@/components/mention-textarea";
 
-export function IdeaCommentForm({ ideaId }: { ideaId: string }) {
+type U = { id: string; name: string };
+
+export function IdeaCommentForm({ ideaId, users = [] }: { ideaId: string; users?: U[] }) {
   const router = useRouter();
   const [body, setBody] = useState("");
   const [saving, setSaving] = useState(false);
@@ -31,11 +34,12 @@ export function IdeaCommentForm({ ideaId }: { ideaId: string }) {
 
   return (
     <form onSubmit={onSubmit} className="space-y-3">
-      <textarea
+      <MentionTextarea
         value={body}
-        onChange={(e) => setBody(e.target.value)}
+        onChange={setBody}
+        users={users}
         rows={3}
-        placeholder="Añade un comentario, comparte un enlace relevante o amplía la idea…"
+        placeholder="Añade un comentario, menciona con @, comparte un enlace o amplía la idea…"
         className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:placeholder-slate-400 dark:focus:ring-blue-900/30"
       />
       {error && (

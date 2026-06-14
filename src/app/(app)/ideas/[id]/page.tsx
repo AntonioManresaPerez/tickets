@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Link2, Pencil, MessageSquare } from "lucide-react";
 import { requireUser } from "@/lib/auth";
-import { canAccessSection } from "@/lib/section";
+import { canAccessSection, sectionUsers } from "@/lib/section";
 import { prisma } from "@/lib/prisma";
 import { timeAgo } from "@/lib/utils";
 import { IDEA_STATUS, IDEA_CATEGORIES, type IdeaStatusKey } from "@/lib/constants";
@@ -35,6 +35,8 @@ export default async function IdeaDetailPage({
 
   if (!idea) notFound();
   if (!(await canAccessSection(idea.section))) notFound();
+
+  const members = await sectionUsers(idea.section);
 
   const isOwner = idea.authorId === session.sub;
   const isAdmin = session.role === "ADMIN";
@@ -167,7 +169,7 @@ export default async function IdeaDetailPage({
         )}
 
         <div className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800">
-          <IdeaCommentForm ideaId={idea.id} />
+          <IdeaCommentForm ideaId={idea.id} users={members} />
         </div>
       </div>
     </div>

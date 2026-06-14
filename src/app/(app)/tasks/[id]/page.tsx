@@ -188,7 +188,7 @@ export default async function TaskDetailPage({
                 ))
               )}
             </div>
-            <CommentForm taskId={task.id} />
+            <CommentForm taskId={task.id} users={members} />
           </section>
         </div>
 

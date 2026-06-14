@@ -3,8 +3,11 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Send } from "lucide-react";
+import { MentionTextarea } from "@/components/mention-textarea";
 
-export function CommentForm({ taskId }: { taskId: number }) {
+type U = { id: string; name: string };
+
+export function CommentForm({ taskId, users = [] }: { taskId: number; users?: U[] }) {
   const router = useRouter();
   const [body, setBody] = useState("");
   const [saving, setSaving] = useState(false);
@@ -27,13 +30,16 @@ export function CommentForm({ taskId }: { taskId: number }) {
 
   return (
     <form onSubmit={submit} className="flex items-end gap-2">
-      <textarea
-        value={body}
-        onChange={(e) => setBody(e.target.value)}
-        rows={2}
-        placeholder="Escribe un comentario…"
-        className="flex-1 resize-none rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:placeholder-slate-400 dark:focus:ring-blue-900/30"
-      />
+      <div className="flex-1">
+        <MentionTextarea
+          value={body}
+          onChange={setBody}
+          users={users}
+          rows={2}
+          placeholder="Escribe un comentario… (usa @ para mencionar)"
+          className="w-full resize-none rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:placeholder-slate-400 dark:focus:ring-blue-900/30"
+        />
+      </div>
       <button
         type="submit"
         disabled={saving || !body.trim()}
