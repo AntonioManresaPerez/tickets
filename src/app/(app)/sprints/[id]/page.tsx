@@ -9,8 +9,9 @@ import { prisma } from "@/lib/prisma";
 import { StatusBadge, PriorityBadge } from "@/components/badges";
 import { SprintStatusSelect } from "@/components/sprint-status-select";
 import { DeleteSprintButton } from "@/components/delete-sprint-button";
+import { Avatar } from "@/components/avatar";
 import { timeAgo } from "@/lib/utils";
-import type { StatusKey, PriorityKey, SprintStatusKey } from "@/lib/constants";
+import { STATUS, BOARD_COLUMNS, type StatusKey, type PriorityKey, type SprintStatusKey } from "@/lib/constants";
 
 export default async function SprintDetailPage({
   params,
@@ -36,6 +37,30 @@ export default async function SprintDetailPage({
   const total = sprint.tasks.length;
   const done = sprint.tasks.filter((t) => t.status === "DONE").length;
   const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  // Métricas: reparto por estado, horas y carga por persona.
+  const byStatus = BOARD_COLUMNS.map((s) => ({
+    key: s,
+    count: sprint.tasks.filter((t) => t.status === s).length,
+  })).filter((s) => s.count > 0);
+
+  const hoursTotal = sprint.tasks.reduce((sum, t) => sum + t.hours, 0);
+  const hoursDone = sprint.tasks
+    .filter((t) => t.status === "DONE")
+    .reduce((sum, t) => sum + t.hours, 0);
+
+  const byAssignee = Object.values(
+    sprint.tasks.reduce<Record<string, { name: string; total: number; done: number }>>(
+      (acc, t) => {
+        const name = t.assignee?.name ?? "Sin asignar";
+        acc[name] ??= { name, total: 0, done: 0 };
+        acc[name].total++;
+        if (t.status === "DONE") acc[name].done++;
+        return acc;
+      },
+      {},
+    ),
+  ).sort((a, b) => b.total - a.total);
 
   return (
     <div className="space-y-6">
@@ -83,6 +108,66 @@ export default async function SprintDetailPage({
           </span>
         </div>
       </div>
+
+      {total > 0 && (
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          {/* Reparto por estado */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Por estado</h3>
+            <div className="flex h-2.5 overflow-hidden rounded-full">
+              {byStatus.map((s) => (
+                <div
+                  key={s.key}
+                  className={STATUS[s.key].dot}
+                  style={{ width: `${(s.count / total) * 100}%` }}
+                  title={`${STATUS[s.key].label}: ${s.count}`}
+                />
+              ))}
+            </div>
+            <ul className="mt-3 space-y-1.5">
+              {byStatus.map((s) => (
+                <li key={s.key} className="flex items-center justify-between text-sm">
+                  <span className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+                    <span className={`h-2 w-2 rounded-full ${STATUS[s.key].dot}`} />
+                    {STATUS[s.key].label}
+                  </span>
+                  <span className="font-medium text-slate-900 dark:text-slate-100">{s.count}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Horas */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Horas estimadas</h3>
+            <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">{hoursTotal}h</p>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              {hoursDone}h completadas ·{" "}
+              {hoursTotal > 0 ? Math.round((hoursDone / hoursTotal) * 100) : 0}%
+            </p>
+          </div>
+
+          {/* Carga por persona */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Por persona</h3>
+            <ul className="space-y-2">
+              {byAssignee.map((a) => (
+                <li key={a.name} className="flex items-center gap-2 text-sm">
+                  {a.name !== "Sin asignar" ? (
+                    <Avatar name={a.name} size="xs" />
+                  ) : (
+                    <span className="h-6 w-6 shrink-0 rounded-full bg-slate-100 dark:bg-slate-700" />
+                  )}
+                  <span className="flex-1 truncate text-slate-600 dark:text-slate-300">{a.name}</span>
+                  <span className="font-medium text-slate-900 dark:text-slate-100">
+                    {a.done}/{a.total}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
 
       <div>
         <h2 className="mb-3 text-base font-semibold text-slate-800 dark:text-slate-200">

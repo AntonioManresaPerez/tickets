@@ -1,13 +1,11 @@
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, Download } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { requireSection, sectionUsers } from "@/lib/section";
 import { prisma } from "@/lib/prisma";
 import { buildTaskWhere } from "@/lib/task-query";
 import { TaskFilters } from "@/components/task-filters";
-import { StatusBadge, PriorityBadge, LabelTag } from "@/components/badges";
-import { Avatar } from "@/components/avatar";
-import { timeAgo, dueDateAlert } from "@/lib/utils";
+import { TaskList, type TaskRow } from "@/components/task-list";
 import type { StatusKey, PriorityKey } from "@/lib/constants";
 
 type SP = Record<string, string | string[] | undefined>;
@@ -38,14 +36,44 @@ export default async function TasksPage({
 
   const where = buildTaskWhere(filters);
 
-  const [tasks, users] = await Promise.all([
+  // URL de exportación con los mismos filtros activos.
+  const exportParams = new URLSearchParams();
+  if (filters.q) exportParams.set("q", filters.q);
+  if (filters.status) exportParams.set("status", filters.status);
+  if (filters.priority) exportParams.set("priority", filters.priority);
+  if (filters.assigneeId) exportParams.set("assigneeId", filters.assigneeId);
+  if (filters.from) exportParams.set("from", filters.from);
+  if (filters.to) exportParams.set("to", filters.to);
+  if (filters.showDone) exportParams.set("showDone", "1");
+  const exportQs = exportParams.toString();
+  const exportHref = exportQs ? `/api/tasks/export?${exportQs}` : "/api/tasks/export";
+
+  const [tasks, users, sprints] = await Promise.all([
     prisma.task.findMany({
       where,
       include: { assignee: { select: { name: true } } },
       orderBy: { createdAt: "desc" },
     }),
     sectionUsers(section),
+    prisma.sprint.findMany({
+      where: { section },
+      select: { id: true, name: true },
+      orderBy: { createdAt: "desc" },
+    }),
   ]);
+
+  const rows: TaskRow[] = tasks.map((t) => ({
+    id: t.id,
+    title: t.title,
+    description: t.description,
+    status: t.status as StatusKey,
+    priority: t.priority as PriorityKey,
+    labels: t.labels,
+    assigneeName: t.assignee?.name ?? null,
+    dueDate: t.dueDate ? t.dueDate.toISOString() : null,
+    dueBucket: t.dueBucket,
+    createdAt: t.createdAt.toISOString(),
+  }));
 
   return (
     <div className="space-y-6">
@@ -56,128 +84,27 @@ export default async function TasksPage({
             {tasks.length} {tasks.length === 1 ? "tarea encontrada" : "tareas encontradas"}
           </p>
         </div>
-        <Link
-          href="/tasks/new"
-          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
-        >
-          <Plus className="h-4 w-4" />
-          Nueva Tarea
-        </Link>
+        <div className="flex items-center gap-2">
+          <a
+            href={exportHref}
+            className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+          >
+            <Download className="h-4 w-4" />
+            <span className="hidden sm:inline">CSV</span>
+          </a>
+          <Link
+            href="/tasks/new"
+            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+          >
+            <Plus className="h-4 w-4" />
+            Nueva Tarea
+          </Link>
+        </div>
       </div>
 
       <TaskFilters users={users} initial={filters} />
 
-      {/* Mobile: card list */}
-      <div className="space-y-3 lg:hidden">
-        {tasks.length === 0 ? (
-          <p className="rounded-2xl border border-slate-200 bg-white px-5 py-12 text-center text-sm text-slate-400 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-            No se encontraron tareas con esos filtros.
-          </p>
-        ) : (
-          tasks.map((t) => {
-            const alert = t.status !== "DONE" ? dueDateAlert(t.dueDate, t.dueBucket) : null;
-            return (
-              <Link
-                key={t.id}
-                href={`/tasks/${t.id}`}
-                className="block rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700/50"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-medium text-slate-900 dark:text-slate-100">{t.title}</span>
-                    {alert && (
-                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${alert.cls}`}>
-                        {alert.label}
-                      </span>
-                    )}
-                  </div>
-                  <StatusBadge status={t.status as StatusKey} />
-                </div>
-                {t.description && (
-                  <p className="mt-1 line-clamp-2 text-xs text-slate-400">{t.description}</p>
-                )}
-                {t.labels.length > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-1">
-                    {t.labels.map((l) => <LabelTag key={l}>{l}</LabelTag>)}
-                  </div>
-                )}
-                <div className="mt-3 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <PriorityBadge priority={t.priority as PriorityKey} />
-                    <span className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-                      {t.assignee && <Avatar name={t.assignee.name} size="xs" />}
-                      {t.assignee?.name ?? "Sin asignar"}
-                    </span>
-                  </div>
-                  <span className="text-xs text-slate-400">
-                    #{t.id} · {timeAgo(t.createdAt)}
-                  </span>
-                </div>
-              </Link>
-            );
-          })
-        )}
-      </div>
-
-      {/* Desktop: table */}
-      <div className="hidden overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800 lg:block">
-        <div className="grid grid-cols-[3.5rem_1fr_11rem_8rem_11rem_7rem] gap-3 border-b border-slate-100 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
-          <span>#</span>
-          <span>Título</span>
-          <span>Estado</span>
-          <span>Prioridad</span>
-          <span>Asignado a</span>
-          <span className="text-right">Creada</span>
-        </div>
-
-        {tasks.length === 0 ? (
-          <p className="px-5 py-12 text-center text-sm text-slate-400">
-            No se encontraron tareas con esos filtros.
-          </p>
-        ) : (
-          tasks.map((t) => {
-            const alert = t.status !== "DONE" ? dueDateAlert(t.dueDate, t.dueBucket) : null;
-            return (
-            <Link
-              key={t.id}
-              href={`/tasks/${t.id}`}
-              className="grid grid-cols-[3.5rem_1fr_11rem_8rem_11rem_7rem] items-center gap-3 border-b border-slate-50 px-5 py-3.5 text-sm transition last:border-0 hover:bg-slate-50 dark:border-slate-700/50 dark:hover:bg-slate-700/50"
-            >
-              <span className="text-slate-400">{t.id}</span>
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="truncate font-medium text-slate-900 dark:text-slate-100">{t.title}</span>
-                  {alert && (
-                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${alert.cls}`}>
-                      {alert.label}
-                    </span>
-                  )}
-                  {t.labels.map((l) => (
-                    <LabelTag key={l}>{l}</LabelTag>
-                  ))}
-                </div>
-                {t.description && (
-                  <p className="mt-0.5 truncate text-xs text-slate-400">{t.description}</p>
-                )}
-              </div>
-              <span>
-                <StatusBadge status={t.status as StatusKey} />
-              </span>
-              <span>
-                <PriorityBadge priority={t.priority as PriorityKey} />
-              </span>
-              <span className="flex items-center gap-1.5 truncate text-slate-600 dark:text-slate-300">
-                {t.assignee && <Avatar name={t.assignee.name} size="xs" />}
-                {t.assignee?.name ?? "Sin asignar"}
-              </span>
-              <span className="text-right text-xs text-slate-400">
-                {timeAgo(t.createdAt)}
-              </span>
-            </Link>
-            );
-          })
-        )}
-      </div>
+      <TaskList tasks={rows} users={users} sprints={sprints} />
     </div>
   );
 }

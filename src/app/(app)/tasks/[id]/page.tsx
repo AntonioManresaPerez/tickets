@@ -14,6 +14,7 @@ import { CommentForm } from "@/components/comment-form";
 import { DeleteTaskButton } from "@/components/delete-task-button";
 import { AssignToMe } from "@/components/assign-to-me";
 import { Checklist } from "@/components/checklist";
+import { Subtasks } from "@/components/subtasks";
 import { InlineDescription } from "@/components/inline-description";
 import { DeleteCommentButton } from "@/components/delete-comment-button";
 import { TaskScheduler } from "@/components/task-scheduler";
@@ -75,6 +76,8 @@ export default async function TaskDetailPage({
       assignee: { select: { name: true } },
       createdBy: { select: { name: true } },
       collaborators: { select: { id: true, name: true }, orderBy: { name: "asc" } },
+      parent: { select: { id: true, title: true } },
+      subtasks: { select: { id: true, title: true, status: true }, orderBy: { createdAt: "asc" } },
       comments: {
         include: { author: { select: { id: true, name: true } } },
         orderBy: { createdAt: "asc" },
@@ -115,6 +118,14 @@ export default async function TaskDetailPage({
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm font-medium text-slate-400">#{task.id}</span>
+            {task.parent && (
+              <Link
+                href={`/tasks/${task.parent.id}`}
+                className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500 transition hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-400 dark:hover:bg-slate-600"
+              >
+                ↳ subtarea de #{task.parent.id}
+              </Link>
+            )}
             {task.labels.map((l) => (
               <LabelTag key={l}>{l}</LabelTag>
             ))}
@@ -151,6 +162,15 @@ export default async function TaskDetailPage({
             <h2 className={titleClass}>Descripción</h2>
             <InlineDescription taskId={task.id} description={task.description ?? null} />
           </section>
+
+          <Subtasks
+            parentId={task.id}
+            subtasks={task.subtasks.map((s) => ({
+              id: s.id,
+              title: s.title,
+              status: s.status as StatusKey,
+            }))}
+          />
 
           <Checklist
             taskId={task.id}

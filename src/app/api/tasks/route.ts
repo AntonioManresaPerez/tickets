@@ -14,6 +14,7 @@ const createSchema = z.object({
   dueBucket: z.enum(["NONE", "TODAY", "WEEK"]).optional(),
   dueDate: z.string().optional().nullable(),
   labels: z.array(z.string()).optional(),
+  parentId: z.number().int().optional().nullable(),
 });
 
 export async function POST(req: Request) {
@@ -47,6 +48,7 @@ export async function POST(req: Request) {
       dueDate: d.dueDate ? new Date(d.dueDate) : null,
       labels: d.labels ?? [],
       assigneeId: d.assigneeId || null,
+      parentId: d.parentId ?? null,
       createdById: session.sub,
     },
   });

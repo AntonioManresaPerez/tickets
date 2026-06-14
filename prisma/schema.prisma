@@ -101,6 +101,11 @@ model Task {
   sprintId String?
   sprint   Sprint? @relation(fields: [sprintId], references: [id], onDelete: SetNull)
 
+  // Subtareas: una tarea puede ser hija de otra.
+  parentId Int?
+  parent   Task?  @relation("Subtasks", fields: [parentId], references: [id], onDelete: Cascade)
+  subtasks Task[] @relation("Subtasks")
+
   comments       Comment[]
   activities     Activity[]
   checklistItems ChecklistItem[]
@@ -110,6 +115,7 @@ model Task {
   @@index([section])
   @@index([assigneeId])
   @@index([sprintId])
+  @@index([parentId])
   @@index([createdAt])
   @@index([dueDate])
 }
