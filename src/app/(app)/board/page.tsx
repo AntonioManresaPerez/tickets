@@ -11,7 +11,8 @@ export default async function BoardPage() {
   const section = await requireSection();
 
   const tasks = await prisma.task.findMany({
-    where: { section },
+    // Las subtareas se gestionan en su propia pestaña, no en el tablero.
+    where: { section, parentId: null },
     select: {
       id: true,
       title: true,

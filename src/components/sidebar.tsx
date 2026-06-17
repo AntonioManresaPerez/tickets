@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutGrid,
   ListChecks,
+  ListTree,
   CalendarDays,
   Plus,
   Users,
@@ -37,6 +38,7 @@ type NavItem = {
 const NAV: NavItem[] = [
   { href: "/", label: "Dashboard", icon: LayoutGrid, exact: true },
   { href: "/tasks", label: "Tareas", icon: ListChecks },
+  { href: "/subtasks", label: "Subtareas", icon: ListTree },
   { href: "/board", label: "Tablero", icon: Columns3 },
   { href: "/sprints", label: "Sprints", icon: Rocket },
   { href: "/calendar", label: "Calendario", icon: CalendarDays },

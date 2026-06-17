@@ -36,6 +36,23 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Sin sección activa" }, { status: 403 });
   }
 
+  // Si es una subtarea: la tarea padre debe existir y pertenecer a la sección
+  // activa. Además, la subtarea hereda el responsable del padre cuando no se
+  // indica otro de forma explícita (p. ej. al crearla desde el detalle).
+  let assigneeId = d.assigneeId ?? null;
+  if (d.parentId != null) {
+    const parent = await prisma.task.findUnique({
+      where: { id: d.parentId },
+      select: { section: true, assigneeId: true },
+    });
+    if (!parent || parent.section !== section) {
+      return NextResponse.json({ error: "Tarea padre no válida" }, { status: 400 });
+    }
+    if (d.assigneeId === undefined || d.assigneeId === null) {
+      assigneeId = parent.assigneeId;
+    }
+  }
+
   const task = await prisma.task.create({
     data: {
       title: d.title,
@@ -47,7 +64,7 @@ export async function POST(req: Request) {
       dueBucket: d.dueBucket ?? "NONE",
       dueDate: d.dueDate ? new Date(d.dueDate) : null,
       labels: d.labels ?? [],
-      assigneeId: d.assigneeId || null,
+      assigneeId,
       parentId: d.parentId ?? null,
       createdById: session.sub,
     },

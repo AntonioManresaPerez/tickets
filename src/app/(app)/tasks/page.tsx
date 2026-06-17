@@ -35,6 +35,8 @@ export default async function TasksPage({
   };
 
   const where = buildTaskWhere(filters);
+  // Las subtareas tienen su propia pestaña; aquí solo tareas principales.
+  where.parentId = null;
 
   // URL de exportación con los mismos filtros activos.
   const exportParams = new URLSearchParams();
@@ -51,7 +53,10 @@ export default async function TasksPage({
   const [tasks, users, sprints] = await Promise.all([
     prisma.task.findMany({
       where,
-      include: { assignee: { select: { name: true } } },
+      include: {
+        assignee: { select: { name: true } },
+        subtasks: { select: { status: true } },
+      },
       orderBy: { createdAt: "desc" },
     }),
     sectionUsers(section),
@@ -73,6 +78,8 @@ export default async function TasksPage({
     dueDate: t.dueDate ? t.dueDate.toISOString() : null,
     dueBucket: t.dueBucket,
     createdAt: t.createdAt.toISOString(),
+    subTotal: t.subtasks.length,
+    subDone: t.subtasks.filter((s) => s.status === "DONE").length,
   }));
 
   return (

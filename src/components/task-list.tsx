@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { X, Trash2 } from "lucide-react";
+import { X, Trash2, ListTree } from "lucide-react";
 import { StatusBadge, PriorityBadge, LabelTag } from "@/components/badges";
 import { Avatar } from "@/components/avatar";
 import { useToast } from "@/components/ui/toast";
@@ -29,7 +29,22 @@ export type TaskRow = {
   dueDate: string | null;
   dueBucket: string;
   createdAt: string;
+  subTotal: number;
+  subDone: number;
 };
+
+function SubtaskPill({ done, total }: { done: number; total: number }) {
+  if (total === 0) return null;
+  return (
+    <span
+      title={`${done}/${total} subtareas completadas`}
+      className="inline-flex shrink-0 items-center gap-1 rounded-full bg-slate-100 px-1.5 py-0.5 text-[11px] font-medium text-slate-500 dark:bg-slate-700 dark:text-slate-300"
+    >
+      <ListTree className="h-3 w-3" />
+      {done}/{total}
+    </span>
+  );
+}
 
 type Opt = { id: string; name: string };
 
@@ -129,6 +144,7 @@ export function TaskList({
                           {alert.label}
                         </span>
                       )}
+                      <SubtaskPill done={t.subDone} total={t.subTotal} />
                     </div>
                     <StatusBadge status={t.status} />
                   </div>
@@ -198,6 +214,7 @@ export function TaskList({
                           {alert.label}
                         </span>
                       )}
+                      <SubtaskPill done={t.subDone} total={t.subTotal} />
                       {t.labels.map((l) => <LabelTag key={l}>{l}</LabelTag>)}
                     </div>
                     {t.description && <p className="mt-0.5 truncate text-xs text-slate-400">{t.description}</p>}
