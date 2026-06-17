@@ -18,6 +18,7 @@ import {
   Columns3,
   Rocket,
   Search,
+  Upload,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -43,6 +44,7 @@ const NAV: NavItem[] = [
   { href: "/sprints", label: "Sprints", icon: Rocket },
   { href: "/calendar", label: "Calendario", icon: CalendarDays },
   { href: "/ideas", label: "Ideas", icon: Lightbulb },
+  { href: "/import", label: "Importar", icon: Upload },
   { href: "/tasks/new", label: "Nueva Tarea", icon: Plus, exact: true },
   { href: "/users", label: "Usuarios", icon: Users, adminOnly: true },
 ];
