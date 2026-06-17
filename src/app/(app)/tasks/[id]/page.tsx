@@ -156,6 +156,8 @@ export default async function TaskDetailPage({
               taskId={task.id}
               current={task.status as StatusKey}
               prevStatus={task.prevStatus as StatusKey | null}
+              subTotal={task.subtasks.length}
+              subDone={task.subtasks.filter((s) => s.status === "DONE").length}
             />
           </section>
 
@@ -179,6 +181,7 @@ export default async function TaskDetailPage({
               title: s.title,
               status: s.status as StatusKey,
             }))}
+            users={members}
           />
 
           <Checklist

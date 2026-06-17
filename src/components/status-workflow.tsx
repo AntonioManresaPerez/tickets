@@ -5,25 +5,41 @@ import { useState } from "react";
 import { ArrowRight, ArrowLeft, Check, Pause, Play } from "lucide-react";
 import { STATUS, STATUS_ORDER, type StatusKey } from "@/lib/constants";
 import { useToast } from "@/components/ui/toast";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { cn } from "@/lib/utils";
 
 export function StatusWorkflow({
   taskId,
   current,
   prevStatus,
+  subTotal = 0,
+  subDone = 0,
 }: {
   taskId: number;
   current: StatusKey;
   prevStatus?: StatusKey | null;
+  subTotal?: number;
+  subDone?: number;
 }) {
   const router = useRouter();
   const { toast } = useToast();
+  const confirm = useConfirm();
   const [status, setStatus] = useState<StatusKey>(current);
   const [saving, setSaving] = useState(false);
   // Al continuar una tarea parada, volvemos a donde estaba (o a "En progreso").
   const resumeTo: StatusKey = prevStatus && prevStatus !== "PAUSED" ? prevStatus : "IN_PROGRESS";
 
   async function move(to: StatusKey) {
+    if (to === "DONE" && subTotal > 0 && subDone < subTotal) {
+      const pending = subTotal - subDone;
+      const ok = await confirm({
+        title: "¿Finalizar con subtareas abiertas?",
+        message: `Quedan ${pending} subtarea${pending === 1 ? "" : "s"} sin completar. ¿Quieres finalizar la tarea igualmente?`,
+        confirmLabel: "Finalizar de todas formas",
+        danger: false,
+      });
+      if (!ok) return;
+    }
     const before = status;
     setStatus(to);
     setSaving(true);
